@@ -1,24 +1,170 @@
 @page "/players"
-
 @inject Data.IFNFData FNFData
 
-<h3>Players</h3>
+<MudText Typo="Typo.h2" Class="mb-4">Players</MudText>
 
-@if (allPlayers is not null)
+<div class="d-flex flex-column align-center ma-4">
+    <div class="d-flex flex-row align-center ma-4">
+        <MudButton Color="@(currentNationality == null ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByNationality(null))" 
+                   Class="flag-circle">
+            <MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Large" />
+        </MudButton>
+        <MudButton Color="@(currentNationality == "CAN" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByNationality("CAN"))" 
+                   Class="flag-circle">
+            <span class="flag-emoji">🇨🇦</span>
+        </MudButton>
+        <MudButton Color="@(currentNationality == "USA" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByNationality("USA"))" 
+                   Class="flag-circle">
+            <span class="flag-emoji">🇺🇸</span>
+        </MudButton>
+        <MudButton Color="@(currentNationality == "SWE" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByNationality("SWE"))" 
+                   Class="flag-circle">
+            <span class="flag-emoji">🇸🇪</span>
+        </MudButton>
+        <MudButton Color="@(currentNationality == "FIN" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByNationality("FIN"))" 
+                   Class="flag-circle">
+            <span class="flag-emoji">🇫🇮</span>
+        </MudButton>
+    </div>
+    <div class="filter-group">
+        <MudButton Color="@(currentPosition == null ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByPosition(null))" 
+                   Class="position-circle">
+            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" />
+        </MudButton>
+        <MudButton Color="@(currentPosition == "F" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByPosition("F"))" 
+                   Class="position-circle">
+            <span class="position-letter">F</span>
+        </MudButton>
+        <MudButton Color="@(currentPosition == "D" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByPosition("D"))" 
+                   Class="position-circle">
+            <span class="position-letter">D</span>
+        </MudButton>
+        <MudButton Color="@(currentPosition == "G" ? Color.Primary : Color.Default)"
+                   OnClick="@(() => FilterByPosition("G"))" 
+                   Class="position-circle">
+            <span class="position-letter">G</span>
+        </MudButton>
+    </div>
+</div>
+
+@if (filteredPlayers is not null)
 {
-    foreach (var player in allPlayers)
+    @foreach(var player in filteredPlayers)
     {
-        <MudText>@player.FirstName</MudText>
+        <MudPaper Class="pa-4 ma-2" Elevation="0">
+            <MudStack>
+                <MudStack Row="true" AlignItems="AlignItems.Center">
+                    <MudAvatar Color="Color.Primary" Size="Size.Medium" Class="mr-3">@player.FirstName.First()</MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.h6">@player.FirstName @player.LastName</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @player.Position &nbsp;&nbsp;•&nbsp;&nbsp; @player.Nationality 
+                            @if (player.Position == "F" || player.Position == "D")
+                            {
+                                <span>&nbsp;&nbsp;•&nbsp;&nbsp; 5 G &nbsp; 10 A &nbsp; 15 Pts</span>
+                            }
+                            @if (player.Position == "G"){
+                                <span>&nbsp;&nbsp;•&nbsp;&nbsp; .915 SV% &nbsp; 2.33 GAA</span>
+
+                            }
+                        </MudText>
+                    </div>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
     }
+
+
+   
+}
+else
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 
-@code {
+<style>
+    .filter-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 30px 0;
+        gap: 20px;
+    }
 
+    .filter-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .flag-circle, .position-circle {
+        border-radius: 50% !important;
+        min-width: 64px !important;
+        width: 64px !important;
+        height: 64px !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .flag-emoji {
+        font-size: 32px;
+        line-height: 1;
+    }
+
+    .position-letter {
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+
+@code {
     private IEnumerable<Data.FNFPlayer> allPlayers;
+    private IEnumerable<Data.FNFPlayer> filteredPlayers;
+    private string currentNationality;
+    private string currentPosition;
 
     protected override async Task OnInitializedAsync()
     {
         allPlayers = await FNFData.GetAllPlayersAsync();
+        filteredPlayers = allPlayers;
     }
-    
+
+    private void FilterByNationality(string nationality)
+    {
+        currentNationality = nationality;
+        ApplyFilters();
+    }
+
+    private void FilterByPosition(string position)
+    {
+        currentPosition = position;
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredPlayers = allPlayers;
+
+        if (!string.IsNullOrEmpty(currentNationality))
+        {
+            filteredPlayers = filteredPlayers.Where(p => p.Nationality == currentNationality);
+        }
+
+        if (!string.IsNullOrEmpty(currentPosition))
+        {
+            filteredPlayers = filteredPlayers.Where(p => p.Position == currentPosition);
+        }
+    }
 }
+
