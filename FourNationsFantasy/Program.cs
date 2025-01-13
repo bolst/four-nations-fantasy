@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using MudBlazor.Services;
 using FourNationsFantasy.Components;
 using FourNationsFantasy.Data;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +20,11 @@ builder.Services.AddScoped<IFNFData>(provider =>
 builder.Services.AddScoped<CustomUserService>(provider =>
 {
     var localStorageService = provider.GetRequiredService<ILocalStorageService>();
-    return new CustomUserService(localStorageService, sbUrl!, sbKey!);
+    var fnfData = provider.GetRequiredService<IFNFData>();
+    return new CustomUserService(localStorageService, fnfData, sbUrl!, sbKey!);
 });
+builder.Services.AddScoped<CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
 
 // Add MudBlazor services
 builder.Services.AddMudServices();

@@ -12,8 +12,18 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     public CustomAuthenticationStateProvider(CustomUserService userService)
     {
         _userService = userService;
+        AuthenticationStateChanged += OnAuthenticationStateChangedAsync;
     }
 
+    private async void OnAuthenticationStateChangedAsync(Task<AuthenticationState> task)
+    {
+        var authState = await task;
+
+        if (authState.User.Identity is not null)
+        {
+            CurrentUser = User.FromClaimsPrincipal(authState.User);
+        }
+    }
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var principal = new ClaimsPrincipal();

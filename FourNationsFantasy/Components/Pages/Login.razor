@@ -2,19 +2,17 @@
 
 @inject NavigationManager Navigation
 @inject Data.CustomUserService CustomUserService
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 
 <PageTitle>Login</PageTitle>
 
 <div style="height: 80vh">
-    @if (sentLink)
-    {
-        <MudText>Check your inbox for a login link!</MudText>
-    }
-    else
-    {
-        <MudStack>
-            <MudTextField Class="justify-center" @bind-Value="emailInput" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email"/>
-            <MudButton Class="justify-center" OnClick="OnEmailSubmit" Variant="Variant.Filled" FullWidth>
+    <MudStack>
+        <MudTextField Class="justify-center" @bind-Value="emailInput" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email"/>
+        @if (sentLink)
+        {
+            <MudTextField Class="justify-center" @bind-Value="otpInput" Label="OTP" Variant="Variant.Outlined" />
+            <MudButton Class="justify-center" OnClick="OnOTPSubmit" Variant="Variant.Filled" FullWidth>
                 @if(isLoading)
                 {
                     <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true"/>
@@ -24,20 +22,44 @@
                     <MudText>Login</MudText>
                 }
             </MudButton>
-        </MudStack>
-    }
+        }
+        else
+        {
+            <MudButton Class="justify-center" OnClick="OnEmailSubmit" Variant="Variant.Filled" FullWidth>
+                @if(isLoading)
+                {
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true"/>
+                }
+                else
+                {
+                    <MudText>Send OTP</MudText>
+                }
+            </MudButton>
+        }
+
+        @if (!sentLink)
+        {
+            <MudButton Class="justify-center" OnClick="() => sentLink = true" FullWidth>I already have a OTP</MudButton>
+        }
+        
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudText Color="Color.Error">@errorMessage</MudText>
+        }
+    </MudStack>
 </div>
 
 
 @code{
     private string emailInput;
+    private string otpInput;
     private bool sentLink = false;
     private bool isLoading = false;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        // if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.UserID))
-        if (true)
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
         {
             sentLink = false;
             isLoading = false;
@@ -52,7 +74,7 @@
     {
         isLoading = true;
         
-        var status = await CustomUserService.SendMagicLink(emailInput);
+        var status = await CustomUserService.SendOTP(emailInput);
         sentLink = status.Item1;
 
         if (!sentLink)
@@ -61,6 +83,17 @@
         }
 
         isLoading = false;
+    }
+
+    private async Task OnOTPSubmit()
+    {
+        var status = await CustomUserService.VerifyOTP(emailInput, otpInput);
+
+        if (!status.Item1)
+        {
+            errorMessage = status.Item2;
+            otpInput = string.Empty;
+        }
     }
 
 }

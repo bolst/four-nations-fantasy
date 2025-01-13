@@ -30,12 +30,27 @@ public abstract class QueryDapperBase
 
 public interface IFNFData
 {
+    Task<User?> GetUserAsync(string email);
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
 }
 
 public class FNFData : QueryDapperBase, IFNFData
 {
     public FNFData(string connectionString, IServiceProvider serviceProvider) : base(connectionString, serviceProvider) {}
+
+    public async Task<User?> GetUserAsync(string email)
+    {
+        string sql = @"SELECT
+                          id AS Id,
+                          email AS Email,
+                          firstname AS FirstName,
+                          lastname AS LastName,
+                          teamname AS TeamName
+                        FROM
+                          accounts
+                        WHERE email = @Email";
+        return await QueryDbSingleAsync<User>(sql, new { Email = email });
+    }
     
     public async Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync()
     {

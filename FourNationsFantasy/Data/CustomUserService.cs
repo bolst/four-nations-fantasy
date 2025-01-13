@@ -8,16 +8,18 @@ public class CustomUserService
 {
     private ILocalStorageService _localStorageService;
     private IDataProtector _protector;
+    private readonly IFNFData _FNFData;
     private readonly Supabase.Client _supabase;
 
-    public CustomUserService(ILocalStorageService localStorageService, string url, string key)
+    public CustomUserService(ILocalStorageService localStorageService, IFNFData FNFData, string url, string key)
     {
         _localStorageService = localStorageService;
         _protector = DataProtectionProvider.Create("FNF_NBC").CreateProtector("creds");
+        _FNFData = FNFData;
         _supabase = new Supabase.Client(url, key);
     }
 
-    public async Task<(bool, string)> SendMagicLink(string email)
+    public async Task<(bool, string)> SendOTP(string email)
     {
         var options = new SignInOptions { RedirectTo = "http://localhost:5257/auth", FlowType = Constants.OAuthFlowType.PKCE};
         bool status = await _supabase.Auth.SendMagicLink(email, options);
@@ -31,19 +33,28 @@ public class CustomUserService
         return (status, errorMsg);
     }
 
-    public async Task VerifyToken(string email, string token)
+    public async Task<(bool, string)> VerifyOTP(string email, string token)
     {
-        var session = await _supabase.Auth.VerifyOTP(email, token, Constants.EmailOtpType.Email);
-        
-        if (session?.AccessToken is not null)
+        try
         {
-            await PersistUserToBrowserAsync(email, session.AccessToken);
+            var session = await _supabase.Auth.VerifyOTP(email, token, Constants.EmailOtpType.Email);
+
+            if (session?.AccessToken is not null)
+            {
+                await PersistUserToBrowserAsync(email, session.AccessToken);
+            }
+
+            return (true, string.Empty);
+        }
+        catch
+        {
+            return (false, "Invalid OTP");
         }
     }
 
     public async Task<User?> LookupUserInDatabase(string email)
     {
-        return null;
+        return await _FNFData.GetUserAsync(email);
     }
 
     public async Task PersistUserToBrowserAsync(string email, string token)
