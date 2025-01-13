@@ -1,9 +1,26 @@
+using Blazored.LocalStorage;
 using MudBlazor.Services;
 using FourNationsFantasy.Components;
+using FourNationsFantasy.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = Environment.GetEnvironmentVariable("ConnectionString__FNF");
+var sbUrl = Environment.GetEnvironmentVariable("SupabaseUrl__FNF");
+var sbKey = Environment.GetEnvironmentVariable("SupabaseKey__FNF");
+
+builder.Services.AddBlazoredLocalStorage();
+
+builder.Services.AddScoped<IFNFData>(provider =>
+{
+    return new FNFData(connectionString, provider);
+});
+
+builder.Services.AddScoped<CustomUserService>(provider =>
+{
+    var localStorageService = provider.GetRequiredService<ILocalStorageService>();
+    return new CustomUserService(localStorageService, sbUrl!, sbKey!);
+});
 
 // Add MudBlazor services
 builder.Services.AddMudServices();

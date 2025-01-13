@@ -1,0 +1,24 @@
+@page "/players"
+
+@inject Data.IFNFData FNFData
+
+<h3>Players</h3>
+
+@if (allPlayers is not null)
+{
+    foreach (var player in allPlayers)
+    {
+        <MudText>@player.FirstName</MudText>
+    }
+}
+
+@code {
+
+    private IEnumerable<Data.FNFPlayer> allPlayers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allPlayers = await FNFData.GetAllPlayersAsync();
+    }
+    
+}
