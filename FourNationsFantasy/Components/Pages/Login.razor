@@ -1,0 +1,59 @@
+@page "/"
+
+@inject NavigationManager Navigation
+
+<PageTitle>Login</PageTitle>
+
+<div style="height: 80vh">
+    @if (sentLink)
+    {
+        <MudText>Check your inbox for a login link!</MudText>
+    }
+    else
+    {
+        <MudStack>
+            <MudTextField Class="justify-center" @bind-Value="emailInput" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email"/>
+            <MudButton Class="justify-center" OnClick="OnEmailSubmit" Variant="Variant.Filled" FullWidth>
+                @if(isLoading)
+                {
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true"/>
+                }
+                else
+                {
+                    <MudText>Login</MudText>
+                }
+            </MudButton>
+        </MudStack>
+    }
+</div>
+
+
+@code{
+    private string emailInput;
+    private bool sentLink = false;
+    private bool isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.UserID))
+        if (true)
+        {
+            sentLink = false;
+            isLoading = false;
+        }
+        else
+        {
+            Navigation.NavigateTo("/home");
+        }
+    }
+
+    private async Task OnEmailSubmit()
+    {
+        isLoading = true;
+        // TODO: send magic link
+
+        sentLink = true;
+        isLoading = false;
+    }
+
+}
