@@ -91,7 +91,9 @@ public class FNFData : QueryDapperBase, IFNFData
                           firstname AS FirstName,
                           lastname AS LastName,
                           position AS Position,
-                          nationality AS Nationality
+                          nationality AS Nationality,
+                          user_id AS UserId,
+                          draft_number AS DraftNumber
                         FROM
                           players";
         return await QueryDbAsync<FNFPlayer>(sql);
@@ -100,36 +102,34 @@ public class FNFData : QueryDapperBase, IFNFData
     public async Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId)
     {
         string sql = @"SELECT
-                          R.nhl_id AS NhlId,
-                          P.firstname AS FirstName,
-                          P.lastname AS LastName,
-                          P.position AS Position,
-                          P.nationality AS Nationality
-                        FROM
-                          roster R
-                        JOIN
-                        players P ON R.nhl_id = P.nhl_id
-                        WHERE
-                          R.account_id = @UserId";
+                        P.nhl_id AS NhlId,
+                        P.firstname AS FirstName,
+                        P.lastname AS LastName,
+                        P.position AS Position,
+                        P.nationality AS Nationality,
+                        P.user_id AS UserId,
+                        P.draft_number AS DraftNumber
+                      FROM
+                        players P
+                      WHERE
+                        P.user_id = @UserId";
         return await QueryDbAsync<FNFPlayer>(sql, new { UserId = userId });
     }
 
     public async Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync()
     {
         string sql = @"SELECT
-                          P.nhl_id AS NhlId,
-                          P.firstname AS FirstName,
-                          P.lastname AS LastName,
-                          P.position AS Position,
-                          P.nationality AS Nationality
-                        FROM
-                          players P
-                        WHERE
-                          P.nhl_id NOT IN (
-                            SELECT
-                              nhl_id
-                            FROM
-                              roster)";
+                        P.nhl_id AS NhlId,
+                        P.firstname AS FirstName,
+                        P.lastname AS LastName,
+                        P.position AS Position,
+                        P.nationality AS Nationality,
+                        P.user_id AS UserId,
+                        P.draft_number AS DraftNumber
+                      FROM
+                        players P
+                      WHERE
+                        P.user_id IS NULL";
         return await QueryDbAsync<FNFPlayer>(sql);
     }
 }
@@ -142,6 +142,8 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public string LastName { get; set; }
     public string Position { get; set; }
     public string Nationality { get; set; }
+    public int? DraftNumber { get; set;}
+    public int? UserId { get; set; }
 
     public int NhlIdInt => int.Parse(NhlId);
 
