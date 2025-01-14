@@ -12,7 +12,7 @@
                     <MudText Typo="Typo.h6">@Player.FirstName @Player.LastName</MudText>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                         @Player.Position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.Nationality
-                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @playerProfile.SeasonTotals.Last().Goals G &nbsp; @playerProfile.SeasonTotals.Last().Assists A &nbsp; @playerProfile.SeasonTotals.Last().Points Pts</span>
+                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @playerProfile.SeasonTotals.Last().SavePctg.ToString("N2") SV% &nbsp; @playerProfile.SeasonTotals.Last().GoalsAgainstAvg.ToString("N2") GAA</span>
                     </MudText>
                 </div>
             </MudStack>
@@ -25,13 +25,13 @@
     [Parameter]
     public Data.FNFPlayer? Player { get; set; }
 
-    private Nhl.Api.Models.Player.PlayerProfile? playerProfile;
+    private Nhl.Api.Models.Player.GoalieProfile? playerProfile;
 
     protected override async Task OnInitializedAsync()
     {
         if (Player is not null)
         {
-            playerProfile = await NhlApi.GetPlayerInformationAsync(Player.NhlIdInt);
+            playerProfile = await NhlApi.GetGoalieInformationAsync(Player.NhlIdInt);
         }
     }
 

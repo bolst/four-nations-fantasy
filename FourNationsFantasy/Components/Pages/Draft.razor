@@ -8,15 +8,15 @@
     {
         <MudTextField @bind-Value="_searchString" Placeholder="Search players..." Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
         
-        <MudChipSet T="string" @bind-SelectedValue="_selectedPositionFilter" SelectionMode="SelectionMode.SingleSelection">
+        <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedPositionFilter" SelectionMode="SelectionMode.SingleSelection">
             <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
             <MudChip Text="F" Color="Color.Primary" Variant="Variant.Text" Value=@("F")>F</MudChip>
             <MudChip Text="D" Color="Color.Primary" Variant="Variant.Text" Value=@("D")>D</MudChip>
             <MudChip Text="G" Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
         </MudChipSet>        
         
-        <MudChipSet T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
-            <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
+        <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
+            <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("All")>🌍</MudChip>
             <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")>🇨🇦</MudChip>
             <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")>🇺🇸</MudChip>
             <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")>🇸🇪</MudChip>
