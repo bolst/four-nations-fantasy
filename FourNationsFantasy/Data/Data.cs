@@ -27,6 +27,12 @@ public abstract class QueryDapperBase
         await using var connection = new NpgsqlConnection(_connectionString);
         return await connection.QuerySingleOrDefaultAsync<T>(query, param);
     }
+
+    protected async Task ExecuteSqlAsync(string query, object? param = null)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.ExecuteAsync(query, param);
+    }
 }
 
 public interface IFNFData
@@ -37,6 +43,7 @@ public interface IFNFData
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
     Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync();
+    Task DraftPlayerAsync(FNFPlayer player, User user);
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -131,6 +138,24 @@ public class FNFData : QueryDapperBase, IFNFData
                       WHERE
                         P.user_id IS NULL";
         return await QueryDbAsync<FNFPlayer>(sql);
+    }
+
+    public async Task DraftPlayerAsync(FNFPlayer player, User user)
+    {
+        string draftNumberSql = @"SELECT
+                                      MAX(draft_number)
+                                    FROM
+                                      players p";
+        int currentDraftNumber = await QueryDbSingleAsync<Int16>(draftNumberSql);
+        int newDraftNumber = currentDraftNumber + 1;
+        
+        string sql = @"UPDATE players
+                            SET
+                              user_id = @UserId,
+                              draft_number = @DraftNumber
+                            WHERE
+                              nhl_id = @NhlId";
+        await ExecuteSqlAsync(sql, new { UserId = user.Id, DraftNumber = newDraftNumber, NhlId = player.NhlId });
     }
 }
 

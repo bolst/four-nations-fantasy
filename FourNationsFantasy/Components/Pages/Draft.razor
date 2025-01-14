@@ -1,5 +1,7 @@
 @page "/draft"
+
 @inject Data.IFNFData FNFData
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Nhl.Api.INhlApi NhlApi
 
 <MudPaper Class="pa-4 my-2">
@@ -159,7 +161,10 @@
         Console.WriteLine("CONFIRMED YEAHHHHHHHHHH");
         Console.WriteLine(player.FirstName + " " + player.LastName);
 
-        
+        if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            await FNFData.DraftPlayerAsync(player, CustomAuthenticationStateProvider.CurrentUser);
+        }
 
         playerToConfirm = null;
     }
