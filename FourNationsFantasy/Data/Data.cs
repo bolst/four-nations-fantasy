@@ -44,6 +44,7 @@ public interface IFNFData
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
     Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync();
     Task DraftPlayerAsync(FNFPlayer player, User user);
+    Task<(int, User?)> GetCurrentDraftPickTeamAsync();
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -139,7 +140,7 @@ public class FNFData : QueryDapperBase, IFNFData
                         P.user_id IS NULL";
         return await QueryDbAsync<FNFPlayer>(sql);
     }
-
+    
     public async Task DraftPlayerAsync(FNFPlayer player, User user)
     {
         string draftNumberSql = @"SELECT
@@ -156,6 +157,32 @@ public class FNFData : QueryDapperBase, IFNFData
                             WHERE
                               nhl_id = @NhlId";
         await ExecuteSqlAsync(sql, new { UserId = user.Id, DraftNumber = newDraftNumber, NhlId = player.NhlId });
+    }
+
+    public async Task<(int, User?)> GetCurrentDraftPickTeamAsync()
+    {
+        string draftNumberSql = @"SELECT
+                                      MAX(draft_number)
+                                    FROM
+                                      players p";
+        int currentDraftNumber = await QueryDbSingleAsync<Int16>(draftNumberSql);
+
+        // https://stackoverflow.com/questions/43957015/creating-a-snake-counter
+        const int teams = 6;
+        int currentTeamId = teams - (int)Math.Abs((currentDraftNumber - 1) % (2 * teams) + 1 - teams - 0.5);
+
+        string sql = @"SELECT
+                          id AS Id,
+                          email AS Email,
+                          firstname AS FirstName,
+                          lastname AS LastName,
+                          teamname AS TeamName
+                        FROM
+                          accounts
+                        WHERE id = @TeamId";
+        Data.User? currentUser = await QueryDbSingleAsync<User>(sql, new { TeamId = currentTeamId });
+        
+        return (currentDraftNumber, currentUser);
     }
 }
 

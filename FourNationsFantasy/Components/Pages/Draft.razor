@@ -4,10 +4,20 @@
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Nhl.Api.INhlApi NhlApi
 
-<MudPaper Class="pa-4 my-2">
+@if (currentUserPick is not null && currentPick != 0)
+{
+    <MudStack Class="mb-4" Row="true" Justify="Justify.Center">
+        <MudStack AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h6">Pick @currentPick</MudText>
+            <MudText Typo="Typo.h6" Color=@(isCurrentPick ? Color.Primary : Color.Default)>@currentUserPick.TeamName</MudText>
+        </MudStack>
+    </MudStack>
+}
+
+<MudPaper Class="my-2">
     @if (filteredPlayers is not null)
     {
-        <MudTabs Centered>
+        <MudTabs PanelClass="pa-4" Centered>
             <MudTabPanel Text="Available Players">
                 
                 <br />
@@ -35,11 +45,11 @@
                     <MudStack Class="my-2" Row="true" AlignItems="AlignItems.Center">
                         @if (playerToConfirm is not null && playerToConfirm.Equals(player))
                         {
-                            <MudButton OnClick="() => ConfirmDraft(player)" Color="Color.Success" Variant="Variant.Filled">Confirm</MudButton>
+                            <MudButton Disabled="!isCurrentPick" OnClick="() => ConfirmDraft(player)" Color="Color.Success" Variant="Variant.Filled">Confirm</MudButton>
                         }
                         else
                         {
-                            <MudButton OnClick="() => InitiateDraft(player)" Color="Color.Primary" Variant="Variant.Filled">Draft</MudButton>
+                            <MudButton Disabled="!isCurrentPick" OnClick="() => InitiateDraft(player)" Color="Color.Primary" Variant="Variant.Filled">Draft</MudButton>
                         }
 
                         <MudStack @onclick=@(() => RowClicked(player))>
@@ -85,9 +95,13 @@
     private IEnumerable<Data.FNFPlayer> allPlayers;
     private IEnumerable<Data.FNFPlayer> allAvailablePlayers;
     private IEnumerable<Data.FNFPlayer> filteredPlayers;
-    
     private IEnumerable<Data.User> teams;
 
+    private Data.User? currentUserPick;
+    private int currentPick = 0;
+
+    private bool isCurrentPick => currentUserPick is not null && currentUserPick.Id == CustomAuthenticationStateProvider.CurrentUser.Id;
+    
     private bool _playerOverlayVisible
     {
         get => playerOverlayVisible;
@@ -142,6 +156,7 @@
     
     protected override async Task OnInitializedAsync()
     {
+        (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
         allPlayers = await FNFData.GetAllPlayersAsync();
         filteredPlayers = allPlayers;
         
@@ -156,12 +171,7 @@
 
     private async Task ConfirmDraft(Data.FNFPlayer player)
     {
-        // TODO: Implement draft logic
-        
-        Console.WriteLine("CONFIRMED YEAHHHHHHHHHH");
-        Console.WriteLine(player.FirstName + " " + player.LastName);
-
-        if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email) && CustomAuthenticationStateProvider.CurrentUser.Id == currentUserPick.Id)
         {
             await FNFData.DraftPlayerAsync(player, CustomAuthenticationStateProvider.CurrentUser);
         }
