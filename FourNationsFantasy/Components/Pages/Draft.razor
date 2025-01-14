@@ -30,7 +30,7 @@
                 
                 <MudStack @onclick=@(() => RowClicked(player))>
                     <MudText><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
-                    <MudText Typo="Typo.body2">F - TBL (14)</MudText>
+                    <MudText Typo="Typo.body2">@player.FullPosition &nbsp; @player.Flag</MudText>
                 </MudStack>
             </MudStack>
             
@@ -39,10 +39,10 @@
     }
 </MudPaper>
 
-@if (overlayPlayer is not null && overlayPlayerInfo is not null)
-{
-    <MudOverlay @bind-Visible="@_playerOverlayVisible" DarkBackground AutoClose>
-        <MudPaper Class="py-4" Style="height: 70vh; width: 95vw;">
+<MudOverlay @bind-Visible="@_playerOverlayVisible" DarkBackground AutoClose>
+    <MudPaper Class="py-4" Style="height: 70vh; width: 95vw;">
+        @if (overlayPlayer is not null && overlayPlayerInfo is not null)
+        {
             <MudStack Class="px-4" Row="true" AlignItems="AlignItems.Center">
                 <MudImage Src="@overlayPlayerInfo.Headshot" Width="150"/>
                 
@@ -80,9 +80,9 @@
                 <br/>
                 more player info
             </MudPaper>
-        </MudPaper>
-    </MudOverlay>
-}
+        }
+    </MudPaper>
+</MudOverlay>
 
 @code {
     private IEnumerable<Data.FNFPlayer> allPlayers;
