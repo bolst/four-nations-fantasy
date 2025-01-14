@@ -1,0 +1,39 @@
+@if (GameLogs is not null)
+{
+<MudSimpleTable Dense>
+    <thead>
+    <tr>
+        <th>Fan Pts</th>
+        <th>G</th>
+        <th>A</th>
+        <th>PPP</th>
+        <th>SHP</th>
+        <th>SOG</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var game in GameLogs.PlayerGameLogs)
+    {
+    <tr>
+        <MudText Typo="Typo.caption">@game.GameDate v @game.OpponentAbbrev</MudText>
+    </tr>
+    <tr>
+        <td>0.00</td>
+        <td>@game.Goals</td>
+        <td>@game.Assists</td>
+        <td>@game.PowerPlayPoints</td>
+        <td>@game.ShorthandedPoints</td>
+        <td>@game.Shots</td>
+    </tr>
+    }
+    </tbody>
+</MudSimpleTable>
+}
+
+@code{
+
+    [Parameter]
+    public Nhl.Api.Models.Game.PlayerSeasonGameLog? GameLogs { get; set; }
+
+
+}
