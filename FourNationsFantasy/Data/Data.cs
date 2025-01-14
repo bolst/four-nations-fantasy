@@ -142,6 +142,7 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public string Position { get; set; }
     public string Nationality { get; set; }
 
+    public int NhlIdInt => int.Parse(NhlId);
     public override bool Equals(object obj)
     {
         if (obj is null) return false;

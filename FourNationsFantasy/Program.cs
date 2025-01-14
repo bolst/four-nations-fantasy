@@ -3,6 +3,7 @@ using MudBlazor.Services;
 using FourNationsFantasy.Components;
 using FourNationsFantasy.Data;
 using Microsoft.AspNetCore.Components.Authorization;
+using Nhl.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services.AddScoped<CustomUserService>(provider =>
 });
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
+
+builder.Services.AddSingleton<INhlApi, NhlApi>();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
