@@ -2,23 +2,24 @@
 @inject Data.IFNFData FNFData
 @inject Nhl.Api.INhlApi NhlApi
 
-<MudText Typo="Typo.h2" Class="mb-4">Draft</MudText>
-
 <MudPaper Class="pa-4 my-2">
     @if (filteredPlayers is not null)
     {
         <MudTabs Centered>
             <MudTabPanel Text="Available Players">
-                <MudTextField @bind-Value="_searchString" Placeholder="Search players..." Adornment="Adornment.Start" 
-                    Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
                 
+                <br />
+                
+                <MudTextField @bind-Value="_searchString" Placeholder="Search players..." Adornment="Adornment.Start"
+                              Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+
                 <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedPositionFilter" SelectionMode="SelectionMode.SingleSelection">
                     <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
                     <MudChip Text="F" Color="Color.Primary" Variant="Variant.Text" Value=@("F")>F</MudChip>
                     <MudChip Text="D" Color="Color.Primary" Variant="Variant.Text" Value=@("D")>D</MudChip>
                     <MudChip Text="G" Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
-                </MudChipSet>        
-                
+                </MudChipSet>
+
                 <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
                     <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("All")>🌍</MudChip>
                     <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")>🇨🇦</MudChip>
@@ -30,29 +31,31 @@
                 @foreach (var player in filteredPlayers.Where(x => allAvailablePlayers.Contains(x)))
                 {
                     <MudStack Class="my-2" Row="true" AlignItems="AlignItems.Center">
-                        @if (playerToConfirm == player)
+                        @if (playerToConfirm is not null && playerToConfirm.Equals(player))
                         {
-                            <MudButton OnClick="() => ConfirmDraft(player)" Color="Color.Success" Variant="Variant.Filled">Confirm?</MudButton>
+                            <MudButton OnClick="() => ConfirmDraft(player)" Color="Color.Success" Variant="Variant.Filled">Confirm</MudButton>
                         }
                         else
                         {
                             <MudButton OnClick="() => InitiateDraft(player)" Color="Color.Primary" Variant="Variant.Filled">Draft</MudButton>
                         }
-                        
+
                         <MudStack @onclick=@(() => RowClicked(player))>
                             <MudText><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
                             <MudText Typo="Typo.body2">@player.FullPosition &nbsp; @player.Flag</MudText>
                         </MudStack>
                     </MudStack>
-                    
-                    <MudDivider />
+
+                    <MudDivider/>
                 }
             </MudTabPanel>
             <MudTabPanel Text="Draft Board">
+                
+                <br />
+                
                 <MudPaper Class="pa-2" Style="background-color: var(--mud-palette-background-grey);">
-                    <MudText Align="Align.Center" Typo="Typo.h6" Class="mb-4">Draft Board</MudText>
                     <MudGrid>
-                        @foreach (var player in filteredPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x=> x.DraftNumber))
+                        @foreach (var player in filteredPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
                         {
                             <MudItem xs="6" Class="pa-1">
                                 <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1") Height="90px" @onclick=@(() => RowClicked(player))>
@@ -147,28 +150,18 @@
     private void InitiateDraft(Data.FNFPlayer player)
     {
         playerToConfirm = player;
-
     }
 
     private async Task ConfirmDraft(Data.FNFPlayer player)
     {
         // TODO: Implement draft logic
-        await DraftPlayer(player);
         
         Console.WriteLine("CONFIRMED YEAHHHHHHHHHH");
         Console.WriteLine(player.FirstName + " " + player.LastName);
 
+        
 
         playerToConfirm = null;
-    }
-
-    private async Task DraftPlayer(Data.FNFPlayer player)
-    {
-        // TODO: Implement draft logic
-        // This is where you'd call your API to actually draft the player
-        // After successful draft, update the lists:
-        allAvailablePlayers = allAvailablePlayers.Where(p => p != player);
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task RowClicked(Data.FNFPlayer player)
