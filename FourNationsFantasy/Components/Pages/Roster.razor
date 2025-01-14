@@ -1,0 +1,29 @@
+@page "/roster/{userId:int}"
+
+@inject Data.IFNFData FNFData
+
+@if (userRoster is not null)
+{
+    @foreach (var player in userRoster)
+    {
+        <PlayerPointCard Player="@player" />
+    }
+}
+
+@code {
+    
+    [Parameter]
+    public int userId { get; set; }
+
+    private Data.User? user;
+    private IEnumerable<Data.FNFPlayer>? userRoster;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await FNFData.GetUserByIdAsync(userId);
+        if (user is not null)
+        {
+            userRoster = await FNFData.GetRosterAsync(user.Id);
+        }
+    }
+}

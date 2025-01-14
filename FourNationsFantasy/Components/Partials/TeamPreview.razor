@@ -1,0 +1,23 @@
+
+@if (User is not null)
+{
+    <a href=@($"roster/{User.Id}")>
+        <MudPaper Class="pa-3">
+            <MudStack Style="min-height: 100px" Row="true" AlignItems="AlignItems.Center">
+                <MudAvatar>@User.TeamName.First()</MudAvatar>
+                <MudText Typo="Typo.subtitle2">@User.TeamName</MudText>
+            </MudStack>
+            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
+                <MudText Typo="Typo.body2">0/61 games played</MudText>
+                <MudText Typo="Typo.body2">0.00 points</MudText>
+            </MudStack>
+        </MudPaper>
+    </a>
+}
+
+
+@code {
+    [Parameter] public Data.User User { get; set; }
+    
+    
+}

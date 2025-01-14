@@ -54,7 +54,7 @@ public class CustomUserService
 
     public async Task<User?> LookupUserInDatabase(string email)
     {
-        return await _FNFData.GetUserAsync(email);
+        return await _FNFData.GetUserByEmailAsync(email);
     }
 
     public async Task PersistUserToBrowserAsync(string email, string token)

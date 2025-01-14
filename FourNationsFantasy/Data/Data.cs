@@ -30,15 +30,33 @@ public abstract class QueryDapperBase
 
 public interface IFNFData
 {
-    Task<User?> GetUserAsync(string email);
+    Task<User?> GetUserByIdAsync(int userId);
+    Task<User?> GetUserByEmailAsync(string email);
+    Task<IEnumerable<User>> GetAllUsersAsync();
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
+    Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
+    Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync();
 }
 
 public class FNFData : QueryDapperBase, IFNFData
 {
     public FNFData(string connectionString, IServiceProvider serviceProvider) : base(connectionString, serviceProvider) {}
 
-    public async Task<User?> GetUserAsync(string email)
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        string sql = @"SELECT
+                          id AS Id,
+                          email AS Email,
+                          firstname AS FirstName,
+                          lastname AS LastName,
+                          teamname AS TeamName
+                        FROM
+                          accounts
+                        WHERE id = @UserId";
+        return await QueryDbSingleAsync<User>(sql, new { UserId = userId });
+    }    
+    
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
         string sql = @"SELECT
                           id AS Id,
@@ -51,11 +69,24 @@ public class FNFData : QueryDapperBase, IFNFData
                         WHERE email = @Email";
         return await QueryDbSingleAsync<User>(sql, new { Email = email });
     }
+
+    public async Task<IEnumerable<User>> GetAllUsersAsync()
+    {
+        string sql = @"SELECT
+                          id AS Id,
+                          email AS Email,
+                          firstname AS FirstName,
+                          lastname AS LastName,
+                          teamname AS TeamName
+                        FROM
+                          accounts";
+        return await QueryDbAsync<User>(sql);
+    }
     
     public async Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync()
     {
         string sql = @"SELECT
-                          nhl_id,
+                          nhl_id AS NhlId,
                           firstname AS FirstName,
                           lastname AS LastName,
                           position AS Position,
@@ -64,16 +95,71 @@ public class FNFData : QueryDapperBase, IFNFData
                           players";
         return await QueryDbAsync<FNFPlayer>(sql);
     }
+
+    public async Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId)
+    {
+        string sql = @"SELECT
+                          R.nhl_id AS NhlId,
+                          P.firstname AS FirstName,
+                          P.lastname AS LastName,
+                          P.position AS Position,
+                          P.nationality AS Nationality
+                        FROM
+                          roster R
+                        JOIN
+                        players P ON R.nhl_id = P.nhl_id
+                        WHERE
+                          R.account_id = @UserId";
+        return await QueryDbAsync<FNFPlayer>(sql, new { UserId = userId });
+    }
+
+    public async Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync()
+    {
+        string sql = @"SELECT
+                          P.nhl_id AS NhlId,
+                          P.firstname AS FirstName,
+                          P.lastname AS LastName,
+                          P.position AS Position,
+                          P.nationality AS Nationality
+                        FROM
+                          players P
+                        WHERE
+                          P.nhl_id NOT IN (
+                            SELECT
+                              nhl_id
+                            FROM
+                              roster)";
+        return await QueryDbAsync<FNFPlayer>(sql);
+    }
 }
 
 
-public class FNFPlayer
+public class FNFPlayer : IEquatable<FNFPlayer>
 {
-    public string nhl_id { get; set; }
+    public string NhlId { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Position { get; set; }
     public string Nationality { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is null) return false;
+        FNFPlayer player = obj as FNFPlayer;
+        if (player is null) return false;
+        else return Equals(player);
+    }
+
+    public override int GetHashCode()
+    {
+        return int.Parse(NhlId);
+    }
+
+    public bool Equals(FNFPlayer other)
+    {
+        if (other is null) return false;
+        return (this.NhlId == other.NhlId);
+    }
 }
 
 public class User
@@ -105,4 +191,4 @@ public class User
         TeamName = principal.FindFirstValue(nameof(TeamName))
     };
 }
-    
+

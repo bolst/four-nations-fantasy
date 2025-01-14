@@ -1,0 +1,128 @@
+@page "/draft"
+
+@inject Data.IFNFData FNFData
+
+<MudPaper Class="pa-4 my-2">
+    @if (filteredPlayers is not null)
+    {
+        <MudTextField @bind-Value="_searchString" Placeholder="Search players..." Adornment="Adornment.Start" Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+        
+        <MudChipSet T="string" @bind-SelectedValue="_selectedPositionFilter" SelectionMode="SelectionMode.SingleSelection">
+            <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
+            <MudChip Text="F" Color="Color.Primary" Variant="Variant.Text" Value=@("F")>F</MudChip>
+            <MudChip Text="D" Color="Color.Primary" Variant="Variant.Text" Value=@("D")>D</MudChip>
+            <MudChip Text="G" Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
+        </MudChipSet>        
+        
+        <MudChipSet T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
+            <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
+            <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")>🇨🇦</MudChip>
+            <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")>🇺🇸</MudChip>
+            <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")>🇸🇪</MudChip>
+            <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")>🇫🇮</MudChip>
+        </MudChipSet>
+        
+        @foreach (var player in filteredPlayers.OrderBy(x => !allAvailablePlayers.Contains(x)))
+        {
+            <MudStack Class="my-2" Row="true" AlignItems="AlignItems.Center">
+                <MudButton OnClick="() => DraftPlayer(player)" Color="Color.Primary" Variant="Variant.Filled" Disabled=@(!allAvailablePlayers.Contains(player))>Draft</MudButton>
+                
+                <MudStack>
+                    <MudText><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
+                    <MudText Typo="Typo.body2">F - TBL (14)</MudText>
+                </MudStack>
+            </MudStack>
+            
+            <MudDivider />
+        }
+    }
+</MudPaper>
+
+@code {
+    private IEnumerable<Data.FNFPlayer> allPlayers;
+    private IEnumerable<Data.FNFPlayer> allAvailablePlayers;
+    private IEnumerable<Data.FNFPlayer> filteredPlayers;
+
+    private string _selectedNationality
+    {
+        get => selectedNationality;
+        set
+        {
+            selectedNationality = value;
+            ApplyFilters();
+        }
+    }
+    private string selectedNationality = "All";
+    
+    private string _selectedPositionFilter
+    {
+        get => selectedPositionFilter;
+        set
+        {
+            selectedPositionFilter = value;
+            ApplyFilters();
+        }
+    }
+    private string selectedPositionFilter = "All";
+    
+    private string searchString;
+    private string _searchString
+    {
+        get => searchString;
+        set
+        {
+            searchString = value;
+            ApplyFilters();
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        allPlayers = await FNFData.GetAllPlayersAsync();
+        filteredPlayers = allPlayers;
+        
+        allAvailablePlayers = await FNFData.GetDraftAvailablePlayersAsync();
+    }
+
+    private async Task DraftPlayer(Data.FNFPlayer player)
+    {
+        // TODO
+    }
+
+    private async Task RowClicked(DataGridRowClickEventArgs<Data.FNFPlayer> args)
+    {
+        // TODO
+    }
+
+    private Func<Data.FNFPlayer, bool> quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+
+        if (x.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    private void ApplyFilters()
+    {
+        filteredPlayers = allPlayers;
+        
+        
+        if (selectedPositionFilter != "All")
+        {
+            filteredPlayers = filteredPlayers.Where(p => p.Position == selectedPositionFilter);
+        }
+        
+        if (selectedNationality != "All")
+        {
+            filteredPlayers = filteredPlayers.Where(p => p.Nationality == selectedNationality);
+        }
+        
+        filteredPlayers = filteredPlayers.Where(quickFilter);
+    }
+}

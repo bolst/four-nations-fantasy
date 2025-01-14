@@ -1,0 +1,30 @@
+@if (Player is not null)
+{
+    <MudPaper Class="pa-4 ma-2" Elevation="0">
+        <MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center">
+                <MudAvatar Color="Color.Primary" Size="Size.Medium" Class="mr-3">@Player.FirstName.First()</MudAvatar>
+                <div>
+                    <MudText Typo="Typo.h6">@Player.FirstName @Player.LastName</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        @Player.Position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.Nationality
+                        @if (Player.Position == "F" || Player.Position == "D")
+                        {
+                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; 5 G &nbsp; 10 A &nbsp; 15 Pts</span>
+                        }
+                        @if (Player.Position == "G"){
+                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; .915 SV% &nbsp; 2.33 GAA</span>
+                        }
+                    </MudText>
+                </div>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    
+    [Parameter]
+    public Data.FNFPlayer? Player { get; set; }
+    
+}

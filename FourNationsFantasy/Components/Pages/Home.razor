@@ -1,16 +1,27 @@
 ﻿@page "/home"
 
-@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject NavigationManager Navigation
+@inject Data.IFNFData FNFData
+
+@if (Users is not null)
+{
+    <MudGrid>
+        @foreach (var user in Users)
+        {
+            <MudItem xs="6">
+                <TeamPreview User="@user" />
+            </MudItem>
+        }
+    </MudGrid>
+}
 
 @code{
 
+    private IEnumerable<Data.User>? Users;
+    
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
-        {
-            Navigation.NavigateTo("/");
-        }
+        Users = await FNFData.GetAllUsersAsync();
     }
 
 }

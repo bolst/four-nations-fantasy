@@ -59,27 +59,7 @@
 {
     @foreach(var player in filteredPlayers)
     {
-        <MudPaper Class="pa-4 ma-2" Elevation="0">
-            <MudStack>
-                <MudStack Row="true" AlignItems="AlignItems.Center">
-                    <MudAvatar Color="Color.Primary" Size="Size.Medium" Class="mr-3">@player.FirstName.First()</MudAvatar>
-                    <div>
-                        <MudText Typo="Typo.h6">@player.FirstName @player.LastName</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">
-                            @player.Position &nbsp;&nbsp;•&nbsp;&nbsp; @player.Nationality 
-                            @if (player.Position == "F" || player.Position == "D")
-                            {
-                                <span>&nbsp;&nbsp;•&nbsp;&nbsp; 5 G &nbsp; 10 A &nbsp; 15 Pts</span>
-                            }
-                            @if (player.Position == "G"){
-                                <span>&nbsp;&nbsp;•&nbsp;&nbsp; .915 SV% &nbsp; 2.33 GAA</span>
-
-                            }
-                        </MudText>
-                    </div>
-                </MudStack>
-            </MudStack>
-        </MudPaper>
+        <PlayerPointCard Player="player" />
     }
 
 
