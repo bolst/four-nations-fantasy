@@ -1,115 +1,66 @@
 @page "/schedule"
-@inject NavigationManager Navigation
 
-<style>
-    .schedule-item {
-        max-width: 100%;
-        overflow: hidden;
-    }
-</style>
+@inject NavigationManager Navigation
+@inject Nhl.Api.INhlApi NhlApi
+
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
-    <MudText Typo="Typo.h2" Align="Align.Center" Class="mb-8" Color="Color.Surface">
-        Schedule
-    </MudText>
+    @if (fnSchedule is not null)
+    {
+        <MudStack Spacing="4">
+            @foreach (var day in fnSchedule.GameWeek)
+            {
+                @if (day.Games.Count() > 0)
+                {
+                    <MudText><b>@(DateTime.Parse(day.Date).ToString("dddd, MMMM dd"))</b></MudText>
+                }
+                @foreach (var game in day.Games)
+                {
+                    <MudPaper Class="pa-6" Style="background-color: rgba(255,255,255,0.1); max-width: 100%;">
+                        <MudGrid>
+                            <MudItem xs="6">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4">
+                                    <MudStack AlignItems="AlignItems.Center">
+                                        <span class="flag-emoji" style="font-size: 32px;">@GetFlagEmoji(game.AwayTeam.Abbrev)</span>
+                                        <MudText Color="Color.Surface" Style="font-size: 18px;">0</MudText>
+                                    </MudStack>
+                                    <MudText Color="Color.Surface" Class="mx-2">vs</MudText>
+                                    <MudStack AlignItems="AlignItems.Center">
+                                        <span class="flag-emoji" style="font-size: 32px;">@GetFlagEmoji(game.HomeTeam.Abbrev)</span>
+                                        <MudText Color="Color.Surface" Style="font-size: 18px;">0</MudText>
+                                    </MudStack>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudStack AlignItems="AlignItems.End" Spacing="2">
+                                    <MudText Color="Color.Surface">@game.StartTimeUTC.AddHours(-5).ToString("hh:mm tt")</MudText>
+                                    <MudText Color="Color.Surface">@game.Venue.Default</MudText>
+                                </MudStack>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                }
+            }
+        </MudStack>
+    }
 
-    <MudStack Spacing="4">
-        @foreach (var item in scheduleItems)
-        {
-            <MudPaper Class="pa-6 schedule-item" Style="background-color: rgba(255,255,255,0.1);">
-                <MudGrid>
-                    <MudItem xs="6">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4">
-                            <MudStack AlignItems="AlignItems.Center">
-                                <span class="flag-emoji" style="font-size: 32px;">@GetFlagEmoji(item.Team1)</span>
-                                <MudText Color="Color.Surface" Style="font-size: 18px;">0</MudText>
-                            </MudStack>
-                            <MudText Color="Color.Surface" Class="mx-2">vs</MudText>
-                            <MudStack AlignItems="AlignItems.Center">
-                                <span class="flag-emoji" style="font-size: 32px;">@GetFlagEmoji(item.Team2)</span>
-                                <MudText Color="Color.Surface" Style="font-size: 18px;">0</MudText>
-                            </MudStack>
-                        </MudStack>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <MudStack AlignItems="AlignItems.End" Spacing="2">
-                            <MudText Color="Color.Surface">@item.Date.ToString("MM/dd/yyyy")</MudText>
-                            <MudText Color="Color.Surface">@FormatTime(item.Time)</MudText>
-                            <MudText Color="Color.Surface">@item.Location</MudText>
-                        </MudStack>
-                    </MudItem>
-                </MudGrid>
-            </MudPaper>
-        }
-    </MudStack>
 </MudContainer>
 
-```
-
 @code {
-    private List<ScheduleItem> scheduleItems = new List<ScheduleItem>
+    private Nhl.Api.Models.Schedule.LeagueSchedule? fnSchedule;
+
+    protected override async Task OnInitializedAsync()
     {
-        new ScheduleItem 
-        { 
-            Team1 = "CAN", 
-            Team2 = "SWE", 
-            Date = new DateTime(2025, 02, 12),
-            Time = new TimeSpan(20, 0, 0),
-            Location = "Bell Centre" 
-        },
-        new ScheduleItem 
-        { 
-            Team1 = "USA", 
-            Team2 = "FIN", 
-            Date = new DateTime(2025, 02, 13),
-            Time = new TimeSpan(20, 0, 0),
-            Location = "Bell Centre" 
-        },
-        new ScheduleItem 
-        { 
-            Team1 = "FIN", 
-            Team2 = "SWE", 
-            Date = new DateTime(2025, 02, 15),
-            Time = new TimeSpan(13, 0, 0),
-            Location = "Bell Centre" 
-        },
-        new ScheduleItem
-        { 
-            Team1 = "USA", 
-            Team2 = "CAN", 
-            Date = new DateTime(2025, 02, 15),
-            Time = new TimeSpan(20, 0, 0),
-            Location = "Bell Centre" 
-        },
-        new ScheduleItem
-        { 
-            Team1 = "CAN", 
-            Team2 = "FIN", 
-            Date = new DateTime(2025, 02, 17),
-            Time = new TimeSpan(13, 0, 0),
-            Location = "TD Garden" 
-        },
-        new ScheduleItem
-        { 
-            Team1 = "SWE", 
-            Team2 = "USA", 
-            Date = new DateTime(2025, 02, 17),
-            Time = new TimeSpan(20, 0, 0),
-            Location = "TD Garden" 
-        },
-        new ScheduleItem
-        { 
-            Team1 = "TBD", 
-            Team2 = "TBD", 
-            Date = new DateTime(2025, 02, 20),
-            Time = new TimeSpan(20, 0, 0),
-            Location = "TD Garden" 
-        },
-    };
+        fnSchedule = await NhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 12));
+
+        // add rest of tournament to fnSchedule
+        var secondWeek = await NhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 19));
+        fnSchedule.GameWeek.AddRange(secondWeek.GameWeek.Take(2));
+    }
 
     private string GetFlagEmoji(string teamCode)
     {
-        return teamCode switch
+        return teamCode.ToUpper() switch
         {
             "CAN" => "🇨🇦",
             "USA" => "🇺🇸",

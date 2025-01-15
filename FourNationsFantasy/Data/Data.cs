@@ -144,7 +144,7 @@ public class FNFData : QueryDapperBase, IFNFData
     public async Task DraftPlayerAsync(FNFPlayer player, User user)
     {
         string draftNumberSql = @"SELECT
-                                      MAX(draft_number)
+                                      COALESCE(MAX(draft_number), 0)
                                     FROM
                                       players p";
         int currentDraftNumber = await QueryDbSingleAsync<Int16>(draftNumberSql);
@@ -162,15 +162,15 @@ public class FNFData : QueryDapperBase, IFNFData
     public async Task<(int, User?)> GetCurrentDraftPickTeamAsync()
     {
         string draftNumberSql = @"SELECT
-                                      MAX(draft_number)
+                                      COALESCE(MAX(draft_number), 0)
                                     FROM
                                       players p";
-        int currentDraftNumber = await QueryDbSingleAsync<Int16>(draftNumberSql);
+        int currentDraftNumber = (await QueryDbSingleAsync<Int16>(draftNumberSql)) + 1;
 
         // https://stackoverflow.com/questions/43957015/creating-a-snake-counter
         const int teams = 6;
         int currentTeamId = teams - (int)Math.Abs((currentDraftNumber - 1) % (2 * teams) + 1 - teams - 0.5);
-
+        
         string sql = @"SELECT
                           id AS Id,
                           email AS Email,
