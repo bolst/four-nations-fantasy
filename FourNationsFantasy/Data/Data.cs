@@ -73,7 +73,8 @@ public class FNFData : QueryDapperBase, IFNFData
                           email AS Email,
                           firstname AS FirstName,
                           lastname AS LastName,
-                          teamname AS TeamName
+                          teamname AS TeamName,
+                          role AS Role
                         FROM
                           accounts
                         WHERE id = @UserId";
@@ -87,7 +88,8 @@ public class FNFData : QueryDapperBase, IFNFData
                           email AS Email,
                           firstname AS FirstName,
                           lastname AS LastName,
-                          teamname AS TeamName
+                          teamname AS TeamName,
+                          role AS Role
                         FROM
                           accounts
                         WHERE email = @Email";
@@ -101,7 +103,8 @@ public class FNFData : QueryDapperBase, IFNFData
                           email AS Email,
                           firstname AS FirstName,
                           lastname AS LastName,
-                          teamname AS TeamName
+                          teamname AS TeamName,
+                          role AS Role
                         FROM
                           accounts";
         return await QueryDbAsync<User>(sql);

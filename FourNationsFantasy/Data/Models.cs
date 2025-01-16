@@ -60,6 +60,8 @@ public class User
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? TeamName { get; set; }
+    public string Role { get; set; }
+    public bool IsAdmin => Role.ToLower().Equals("admin");
 
     public ClaimsPrincipal ToClaimsPrincipal()
     {
@@ -69,7 +71,8 @@ public class User
             new (ClaimTypes.Name, Email),
             new (nameof(FirstName), FirstName),
             new (nameof(LastName), LastName),
-            new (nameof(TeamName), TeamName)
+            new (nameof(TeamName), TeamName),
+            new(ClaimTypes.Role, Role)
         }, "FNF"));
     }
 
@@ -79,6 +82,7 @@ public class User
         Email = principal.FindFirstValue(ClaimTypes.Email),
         FirstName = principal.FindFirstValue(nameof(FirstName)),
         LastName = principal.FindFirstValue(nameof(LastName)),
-        TeamName = principal.FindFirstValue(nameof(TeamName))
+        TeamName = principal.FindFirstValue(nameof(TeamName)),
+        Role = principal.FindFirstValue(ClaimTypes.Role),
     };
 }
