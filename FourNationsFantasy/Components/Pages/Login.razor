@@ -1,14 +1,104 @@
 @page "/"
 
 @inject NavigationManager Navigation
+@inject Data.CustomUserService CustomUserService
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+
+<PageTitle>Login</PageTitle>
+
+<div style="height: 80vh">
+    <MudStack>
+        <MudTextField Class="justify-center" @bind-Value="emailInput" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email"/>
+        @if (sentLink)
+        {
+            <MudTextField Class="justify-center" @bind-Value="otpInput" Label="OTP" Variant="Variant.Outlined" />
+            <MudButton Class="justify-center" OnClick="OnOTPSubmit" Variant="Variant.Filled" FullWidth>
+                @if(isLoading)
+                {
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true"/>
+                }
+                else
+                {
+                    <MudText>Login</MudText>
+                }
+            </MudButton>
+        }
+        else
+        {
+            <MudButton Class="justify-center" OnClick="OnEmailSubmit" Variant="Variant.Filled" FullWidth>
+                @if(isLoading)
+                {
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true"/>
+                }
+                else
+                {
+                    <MudText>Send OTP</MudText>
+                }
+            </MudButton>
+        }
+
+        @if (!sentLink)
+        {
+            <MudButton Class="justify-center" OnClick="() => sentLink = true" FullWidth>I already have a OTP</MudButton>
+        }
+        
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudText Color="Color.Error">@errorMessage</MudText>
+        }
+    </MudStack>
+</div>
 
 
 @code{
+    private string emailInput;
+    private string otpInput;
+    private bool sentLink = false;
+    private bool isLoading = false;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            sentLink = false;
+            isLoading = false;
+        }
+        else
+        {
             Navigation.NavigateTo("/home");
+        }
     }
-    
+
+    private async Task OnEmailSubmit()
+    {
+        isLoading = true;
+        
+        var status = await CustomUserService.SendOTP(emailInput);
+        sentLink = status.Item1;
+
+        if (!sentLink)
+        {
+            // TODO: log error message
+        }
+
+        isLoading = false;
+    }
+
+    private async Task OnOTPSubmit()
+    {
+        var status = await CustomUserService.VerifyOTP(emailInput, otpInput);
+
+        if (!status.Item1)
+        {
+            errorMessage = status.Item2;
+            otpInput = string.Empty;
+        }
+
+        if (status.Item1)
+        {
+            Navigation.NavigateTo("/home");
+        }
+    }
 
 }

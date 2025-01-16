@@ -1,6 +1,8 @@
 @page "/roster/{userId:int}"
 
 @inject Data.IFNFData FNFData
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject NavigationManager Navigation
 
 @if (userRoster is not null)
 {
@@ -20,6 +22,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            Navigation.NavigateTo("/");
+        }
+        
         user = await FNFData.GetUserByIdAsync(userId);
         if (user is not null)
         {

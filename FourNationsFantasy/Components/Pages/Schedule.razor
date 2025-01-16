@@ -1,6 +1,7 @@
 @page "/schedule"
 
 @inject NavigationManager Navigation
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Nhl.Api.INhlApi NhlApi
 
 
@@ -51,6 +52,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            Navigation.NavigateTo("/");
+        }
+        
         fnSchedule = await NhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 12));
 
         // add rest of tournament to fnSchedule

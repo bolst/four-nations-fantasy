@@ -3,6 +3,7 @@
 @inject Data.IFNFData FNFData
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Nhl.Api.INhlApi NhlApi
+@inject NavigationManager Navigation
 
 @if (currentUserPick is not null && currentPick != 0)
 {
@@ -156,6 +157,10 @@
     
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            Navigation.NavigateTo("/");
+        }
         (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
         allPlayers = await FNFData.GetAllPlayersAsync();
         filteredPlayers = allPlayers;

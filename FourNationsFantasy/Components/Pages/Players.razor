@@ -1,5 +1,8 @@
 @page "/players"
+
 @inject Data.IFNFData FNFData
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <div class="d-flex flex-column align-center ma-4">
     <div class="d-flex flex-row align-center ma-4">
@@ -103,6 +106,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            Navigation.NavigateTo("/");
+        }
         allPlayers = await FNFData.GetAllPlayersAsync();
         filteredPlayers = allPlayers;
     }
