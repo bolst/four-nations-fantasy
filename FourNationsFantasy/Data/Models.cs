@@ -11,6 +11,8 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public string Nationality { get; set; }
     public int? DraftNumber { get; set;}
     public int? UserId { get; set; }
+    
+    public Nhl.Api.Models.Player.PlayerProfile? Profile { get; set; }
 
     public int NhlIdInt => int.Parse(NhlId);
 

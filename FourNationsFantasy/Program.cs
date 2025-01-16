@@ -12,6 +12,9 @@ var sbUrl = Environment.GetEnvironmentVariable("SupabaseUrl__FNF");
 var sbKey = Environment.GetEnvironmentVariable("SupabaseKey__FNF");
 
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddMemoryCache();
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 builder.Services.AddScoped<IFNFData>(provider =>
 {
