@@ -78,4 +78,11 @@ public class CustomUserService
         }
     }
 
+    public async Task LogoutAsync()
+    {
+        await _localStorageService.RemoveItemAsync("user");
+        await _localStorageService.RemoveItemAsync("login");
+        await _supabase.Auth.SignOut();
+    }
+
 }

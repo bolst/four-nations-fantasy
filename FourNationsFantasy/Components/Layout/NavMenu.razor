@@ -1,4 +1,7 @@
-﻿<MudNavMenu>
+﻿@inject Data.CustomUserService CustomUserService
+@inject NavigationManager Navigation
+
+<MudNavMenu>
 
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
         Home
@@ -12,4 +15,25 @@
     <MudNavLink Href="schedule" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarToday">
         Schedule
     </MudNavLink>
+
+    <MudSpacer />
+
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Error" OnClick="@Logout">
+                 Logout
+            </MudNavLink>
+        </Authorized>
+    </AuthorizeView>
+    
 </MudNavMenu>
+
+@code{
+    private async Task Logout()
+    {
+        await CustomUserService.LogoutAsync();
+        Navigation.NavigateTo("/", true);
+    }
+
+
+}
