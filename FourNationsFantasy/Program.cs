@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using MudBlazor.Services;
 using FourNationsFantasy.Components;
 using FourNationsFantasy.Data;
+using FourNationsFantasy.Hubs;
 using Microsoft.AspNetCore.Components.Authorization;
 using Nhl.Api;
 
@@ -62,5 +63,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHub<DraftHub>(DraftHub.HubUrl);
 
 app.Run();

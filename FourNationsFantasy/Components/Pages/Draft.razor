@@ -1,5 +1,6 @@
 @page "/draft"
 
+@using Microsoft.AspNetCore.SignalR.Client
 @inject Data.IFNFData FNFData
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Nhl.Api.INhlApi NhlApi
@@ -93,9 +94,12 @@
 }
 
 @code {
-    private IEnumerable<Data.FNFPlayer> allPlayers;
-    private IEnumerable<Data.FNFPlayer> allAvailablePlayers;
-    private IEnumerable<Data.FNFPlayer> filteredPlayers;
+    private HubConnection? hubConnection;
+    private bool isConnected => hubConnection is not null && hubConnection.State == HubConnectionState.Connected;
+    
+    private IEnumerable<Data.FNFPlayer>? allPlayers;
+    private IEnumerable<Data.FNFPlayer>? allAvailablePlayers => allPlayers?.Where(x => x.UserId is null);
+    private IEnumerable<Data.FNFPlayer>? filteredPlayers;
     private IEnumerable<Data.User> teams;
 
     private Data.User? currentUserPick;
@@ -165,8 +169,33 @@
         allPlayers = await FNFData.GetAllPlayersAsync();
         filteredPlayers = allPlayers;
         
-        allAvailablePlayers = await FNFData.GetDraftAvailablePlayersAsync();
         teams = await FNFData.GetAllUsersAsync();
+        
+        // SignalR logic
+        string hubUrl = Navigation.BaseUri.TrimEnd('/') + Hubs.DraftHub.HubUrl;
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl)
+            .Build();
+
+        hubConnection.On<Data.FNFPlayer, Data.User>("DraftPlayer", async (player, user) =>
+        {
+            (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
+
+            allPlayers = allPlayers.Select(p =>
+            {
+                if (p.Equals(player))
+                {
+                    p.UserId = user.Id;
+                    p.DraftNumber = currentPick - 1;
+                }
+                return p;
+            });
+            filteredPlayers = allPlayers;
+            
+            InvokeAsync(StateHasChanged);
+        });
+            
+        await hubConnection.StartAsync();
     }
 
     private void InitiateDraft(Data.FNFPlayer player)
@@ -179,6 +208,11 @@
         if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email) && CustomAuthenticationStateProvider.CurrentUser.Id == currentUserPick.Id)
         {
             await FNFData.DraftPlayerAsync(player, CustomAuthenticationStateProvider.CurrentUser);
+
+            if (isConnected)
+            {
+                await hubConnection.SendAsync("DraftPlayer", player, CustomAuthenticationStateProvider.CurrentUser);
+            }
         }
 
         playerToConfirm = null;
