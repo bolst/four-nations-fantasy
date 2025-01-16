@@ -5,13 +5,14 @@ namespace FourNationsFantasy.Data;
 
 public abstract class QueryDapperBase
 {
-    protected readonly string _connectionString;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly string _connectionString;
+    protected readonly ICacheService CacheService;
+    protected readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(20);
 
-    public QueryDapperBase(string connectionString, IServiceProvider serviceProvider)
+    public QueryDapperBase(string connectionString, ICacheService cacheService)
     {
         _connectionString = connectionString;
-        _serviceProvider = serviceProvider;
+        CacheService = cacheService;
     }
 
     protected async Task<IEnumerable<T>> QueryDbAsync<T>(string query, object? param = null)
@@ -20,12 +21,22 @@ public abstract class QueryDapperBase
         return await connection.QueryAsync<T>(query, param);
     }
 
+    protected async Task<IEnumerable<T>> QueryDbWithCacheAsync<T>(string cacheKey, string query, object? param = null)
+    {
+        return await CacheService.GetOrAddAsync(cacheKey, async () => await QueryDbAsync<T>(query, param), CacheDuration);
+    }
+    
     protected async Task<T?> QueryDbSingleAsync<T>(string query, object? param = null)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
         return await connection.QuerySingleOrDefaultAsync<T>(query, param);
     }
 
+    protected async Task<T?> QueryDbSingleWithCacheAsync<T>(string cacheKey, string query, object? param = null)
+    {
+        return await CacheService.GetOrAddAsync(cacheKey, async () => await QueryDbSingleAsync<T>(query, param), CacheDuration);
+    }
+    
     protected async Task ExecuteSqlAsync(string query, object? param = null)
     {
         await using var connection = new NpgsqlConnection(_connectionString);
@@ -43,11 +54,17 @@ public interface IFNFData
     Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync();
     Task DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
+    Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId);
+    Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId);
 }
 
 public class FNFData : QueryDapperBase, IFNFData
 {
-    public FNFData(string connectionString, IServiceProvider serviceProvider) : base(connectionString, serviceProvider) {}
+    private readonly Nhl.Api.INhlApi _nhlApi;
+    public FNFData(string connectionString, ICacheService cacheService, Nhl.Api.INhlApi nhlApi) : base(connectionString, cacheService)
+    {
+        _nhlApi = nhlApi;
+    }
 
     public async Task<User?> GetUserByIdAsync(int userId)
     {
@@ -119,6 +136,7 @@ public class FNFData : QueryDapperBase, IFNFData
                         players P
                       WHERE
                         P.user_id = @UserId";
+        
         return await QueryDbAsync<FNFPlayer>(sql, new { UserId = userId });
     }
 
@@ -182,5 +200,18 @@ public class FNFData : QueryDapperBase, IFNFData
         
         return (currentDraftNumber, currentUser);
     }
+
+    public async Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId)
+    {
+        string cacheKey = $"player_profile_{nhlId}";
+        return await CacheService.GetOrAddAsync(cacheKey, async () => await _nhlApi.GetPlayerInformationAsync(nhlId), CacheDuration);
+    }    
+    
+    public async Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId)
+    {
+        string cacheKey = $"goalie_profile_{nhlId}";
+        return await CacheService.GetOrAddAsync(cacheKey, async () => await _nhlApi.GetGoalieInformationAsync(nhlId), CacheDuration);
+    }
+
 }
 

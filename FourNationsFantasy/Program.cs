@@ -15,10 +15,13 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMemoryCache();
 
 builder.Services.AddSingleton<ICacheService, CacheService>();
+builder.Services.AddSingleton<INhlApi, NhlApi>();
 
 builder.Services.AddScoped<IFNFData>(provider =>
 {
-    return new FNFData(connectionString, provider);
+    var cacheService = provider.GetRequiredService<ICacheService>();
+    var nhlApi = provider.GetRequiredService<INhlApi>();
+    return new FNFData(connectionString, cacheService, nhlApi);
 });
 
 builder.Services.AddScoped<CustomUserService>(provider =>
@@ -29,8 +32,6 @@ builder.Services.AddScoped<CustomUserService>(provider =>
 });
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
-
-builder.Services.AddSingleton<INhlApi, NhlApi>();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();

@@ -1,4 +1,4 @@
-@inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
 
 @if (Player is not null && playerProfile is not null)
 {
@@ -27,11 +27,11 @@
 
     private Nhl.Api.Models.Player.PlayerProfile? playerProfile;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         if (Player is not null)
         {
-            playerProfile = await NhlApi.GetPlayerInformationAsync(Player.NhlIdInt);
+            playerProfile = await FNFData.GetPlayerProfileByIdAsync(Player.NhlIdInt);
         }
     }
 

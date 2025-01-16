@@ -183,7 +183,7 @@
     {
         playerOverlayVisible = true;
         overlayPlayer = player;
-        overlayPlayerInfo = await NhlApi.GetPlayerInformationAsync(player.NhlIdInt);
+        overlayPlayerInfo = await FNFData.GetPlayerProfileByIdAsync(player.NhlIdInt);
     }
 
     private Func<Data.FNFPlayer, bool> quickFilter => x =>
