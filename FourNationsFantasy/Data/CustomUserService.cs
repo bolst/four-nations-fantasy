@@ -43,7 +43,7 @@ public class CustomUserService
             {
                 await PersistUserToBrowserAsync(email, session.AccessToken);
             }
-
+            
             return (true, string.Empty);
         }
         catch

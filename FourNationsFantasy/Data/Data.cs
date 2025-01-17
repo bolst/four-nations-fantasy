@@ -56,6 +56,7 @@ public interface IFNFData
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
     Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId);
     Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId);
+    Task UpdateTeamNameAsync(Data.User user, string newName);
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -214,6 +215,14 @@ public class FNFData : QueryDapperBase, IFNFData
     {
         string cacheKey = $"goalie_profile_{nhlId}";
         return await CacheService.GetOrAddAsync(cacheKey, async () => await _nhlApi.GetGoalieInformationAsync(nhlId), CacheDuration);
+    }
+
+    public async Task UpdateTeamNameAsync(Data.User user, string newName)
+    {
+        string sql = @"UPDATE accounts
+                        SET teamname = @TeamName
+                        WHERE id = @UserId";
+        await ExecuteSqlAsync(sql, new { UserId = user.Id, TeamName = newName });
     }
 
 }

@@ -2,7 +2,6 @@
 @inject NavigationManager Navigation
 
 <MudNavMenu>
-
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
         Home
     </MudNavLink>
@@ -15,20 +14,4 @@
     <MudNavLink Href="schedule" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarToday">
         Schedule
     </MudNavLink>
-    
-    <AuthorizeView Roles="admin">
-        <Authorized>
-            <MudNavLink Href="admin" Icon="@Icons.Material.Filled.AdminPanelSettings" IconColor="Color.Warning">
-                Admin
-            </MudNavLink>
-        </Authorized>
-    </AuthorizeView>
-
-    <AuthorizeView>
-        <Authorized>
-            <MudNavLink Href="settings" Icon="@Icons.Material.Filled.Settings">
-                 Settings
-            </MudNavLink>
-        </Authorized>
-    </AuthorizeView>
 </MudNavMenu>

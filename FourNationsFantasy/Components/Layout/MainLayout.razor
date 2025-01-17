@@ -9,10 +9,28 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
+        
+        <MudSpacer />
+
+        <AuthorizeView Roles="admin">
+            <Authorized>
+                <MudNavLink Href="admin" Icon="@Icons.Material.Filled.AdminPanelSettings" IconColor="Color.Warning">
+                    Admin
+                </MudNavLink>
+            </Authorized>
+        </AuthorizeView>
+        
+        <AuthorizeView>
+            <Authorized>
+                <MudNavLink Href="settings" Icon="@Icons.Material.Filled.Settings">
+                    Settings
+                </MudNavLink>
+            </Authorized>
+        </AuthorizeView>
+        
     </MudDrawer>
     <MudMainContent Class="mt-16 pa-4">
         @Body

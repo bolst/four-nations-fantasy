@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace FourNationsFantasy.Data;
 
-// TODO:
 public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly CustomUserService _userService;

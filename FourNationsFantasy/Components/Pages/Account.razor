@@ -1,14 +1,73 @@
 @page "/settings"
+@using FourNationsFantasy.Data
 
+@inject Data.IFNFData FNFData
 @inject Data.CustomUserService CustomUserService
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject NavigationManager Navigation
 
 <PageTitle>Settings</PageTitle>
 
-<MudButton Color="Color.Error" OnClick="Logout" FullWidth>Logout</MudButton>
+@if (!string.IsNullOrEmpty(currentUser.Email))
+{
+    <MudStack AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6">@currentUser.FirstName @currentUser.LastName</MudText>
+        <MudText Typo="Typo.caption">@currentUser.Email</MudText>
+    </MudStack>
+    
+    <MudDivider Class="mt-4 mb-8" />
+
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.DriveFileRenameOutline" IconColor="Color.Info" OnClick="ChangeTeamName">Change team name</MudButton>
+        <MudText Typo="Typo.caption">@currentUser.TeamName</MudText>
+    </MudStack>
+    
+    <br />
+    
+    <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.Logout" IconColor="Color.Error" OnClick="Logout" FullWidth>Logout</MudButton>
+    
+    <MudOverlay @bind-Visible="@overlayVisible" ZIndex="9999" DarkBackground>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Change team name</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack Row="true" Wrap="Wrap.Wrap" Justify="Justify.SpaceAround" AlignItems="AlignItems.Center">
+                    <MudTextField @bind-Value="@newTeamName" Label="Team Name" Variant="Variant.Outlined" AutoGrow />
+                </MudStack>
+                
+                @if (!string.IsNullOrEmpty(newTeamNameErrorMessage))
+                {
+                    <MudText Color="Color.Error">@newTeamNameErrorMessage</MudText>
+                }
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton OnClick="() => overlayVisible = false" Color="Color.Error" FullWidth>Discard</MudButton>                
+                <MudButton OnClick="ConfirmChangeTeamName" Color="Color.Success" FullWidth>
+                    @if (changeTeamNameIsLoading)
+                    {
+                        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.button">Confirm</MudText>
+                    }
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudOverlay>
+}
 
 @code {
+
+    private Data.User currentUser => CustomAuthenticationStateProvider.CurrentUser;
+
+    private string newTeamName;
+    private bool changeTeamNameIsLoading = false;
+    private bool overlayVisible = false;
+    private string newTeamNameErrorMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,6 +81,45 @@
     {
         await CustomUserService.LogoutAsync();
         Navigation.NavigateTo("/", true);
+    }
+
+    private async Task ChangeTeamName()
+    {
+        newTeamName = currentUser.TeamName;
+        overlayVisible = true;
+    }    
+    
+    private async Task ConfirmChangeTeamName()
+    {
+        changeTeamNameIsLoading = true;
+
+        var validate = await ValidateTeamName();
+        await Task.Delay(1000);
+        newTeamNameErrorMessage = validate.Item2;
+
+        if (validate.Item1)
+        {
+            await FNFData.UpdateTeamNameAsync(currentUser, newTeamName);
+            CustomAuthenticationStateProvider.CurrentUser.TeamName = newTeamName;
+            overlayVisible = false;
+        }
+        
+        changeTeamNameIsLoading = false;
+    }
+
+    private async Task<(bool, string)> ValidateTeamName()
+    {
+        if (string.IsNullOrEmpty(newTeamName) || newTeamName.Length < 5)
+        {
+            return (false, "Team name must be at least 5 characters long");
+        }
+
+        if ((await FNFData.GetAllUsersAsync()).Any(x => x.TeamName is not null && x.TeamName.ToLower().Equals(newTeamName.ToLower())))
+        {
+            return (false, "That name is already taken");
+        }
+
+        return (true, string.Empty);
     }
 
 }
