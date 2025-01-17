@@ -1,0 +1,27 @@
+@page "/admin"
+
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Admin</PageTitle>
+
+@if (users is not null)
+{
+    
+}
+
+@code{
+
+    private IEnumerable<Data.User>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            Navigation.NavigateTo("/");
+        }
+        
+        
+    }
+
+}
