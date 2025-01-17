@@ -1,27 +1,78 @@
 @page "/admin"
 
+@inject Data.IFNFData FNFData
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject Data.CustomUserService CustomUserService
 @inject NavigationManager Navigation
 
 <PageTitle>Admin</PageTitle>
 
-@if (users is not null)
-{
+<AuthorizeView Roles="admin">
+    @if (users is not null)
+    {
+        <MudDataGrid T="Data.User" Items="users" RowClick="OnRowClick" SelectedItemChanged="OnItemSelect" Hover="true">
+            <Columns>
+                <PropertyColumn Property=@(x => $"{x.FirstName} {x.LastName}") Title="Name" />
+                <PropertyColumn Property="x => x.Email" Title="Email" />
+                <PropertyColumn Property="x => x.TeamName" Title="Team" />
+            </Columns>
+        </MudDataGrid>
+    }
     
-}
+    @if (selectedUser is not null)
+    {
+        <MudOverlay @bindbind-Visible="@overlayVisible" ZIndex="9999" DarkBackground AutoClose>
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Masquerade as</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudStack Row="true" Wrap="Wrap.Wrap" Justify="Justify.SpaceAround" AlignItems="AlignItems.Center">
+                        <MudText>@selectedUser.FirstName @selectedUser.LastName (@selectedUser.TeamName)</MudText>
+                        <MudButton OnClick="OnMasqueradeClick" Color="Color.Success" Variant="Variant.Filled">Masquerade</MudButton>
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        </MudOverlay>
+    }
+</AuthorizeView>
 
 @code{
-
     private IEnumerable<Data.User>? users;
+    private Data.User? selectedUser;
+    private bool overlayVisible = false;
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email) || !CustomAuthenticationStateProvider.CurrentUser.IsAdmin)
         {
             Navigation.NavigateTo("/");
         }
-        
-        
+        else
+        {
+            users = await FNFData.GetAllUsersAsync();
+        }
     }
 
+    private async Task OnRowClick(DataGridRowClickEventArgs<Data.User> args)
+    {
+        Data.User user = args.Item;
+        await OnItemSelect(user);
+    }
+
+    private async Task OnItemSelect(Data.User user)
+    {
+        selectedUser = user;
+        overlayVisible = true;
+    }
+
+    private async Task OnMasqueradeClick()
+    {
+        if (selectedUser is not null)
+        {
+            // TODO
+        }
+    }
 }
