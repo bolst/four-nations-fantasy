@@ -1,7 +1,27 @@
 @page "/account"
 
+@inject Data.CustomUserService CustomUserService
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject NavigationManager Navigation
+
 <PageTitle>Account</PageTitle>
 
+<MudButton Color="Color.Error" OnClick="Logout" FullWidth>Logout</MudButton>
+
 @code {
-    
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task Logout()
+    {
+        await CustomUserService.LogoutAsync();
+        Navigation.NavigateTo("/", true);
+    }
+
 }
