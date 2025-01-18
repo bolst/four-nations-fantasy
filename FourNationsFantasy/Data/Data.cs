@@ -57,6 +57,7 @@ public interface IFNFData
     Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId);
     Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId);
     Task UpdateTeamNameAsync(Data.User user, string newName);
+    Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync();
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -225,6 +226,22 @@ public class FNFData : QueryDapperBase, IFNFData
                         SET teamname = @TeamName
                         WHERE id = @UserId";
         await ExecuteSqlAsync(sql, new { UserId = user.Id, TeamName = newName });
+    }
+
+    public async Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync()
+    {
+        string cacheKey = $"schedule";
+
+        return await CacheService.GetOrAddAsync(cacheKey, async () =>
+        {
+            var schedule = await _nhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 12));
+
+            // add rest of tournament to fnSchedule
+            var secondWeek = await _nhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 19));
+            schedule.GameWeek.AddRange(secondWeek.GameWeek.Take(2));
+            
+            return schedule;
+        }, CacheDuration);
     }
 
 }

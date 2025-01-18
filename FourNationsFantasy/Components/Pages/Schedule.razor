@@ -2,7 +2,7 @@
 
 @inject NavigationManager Navigation
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
-@inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
 
 <PageTitle>Schedule</PageTitle>
 
@@ -57,12 +57,9 @@
         {
             Navigation.NavigateTo("/");
         }
-        
-        fnSchedule = await NhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 12));
 
-        // add rest of tournament to fnSchedule
-        var secondWeek = await NhlApi.GetLeagueWeekScheduleByDateAsync(new DateOnly(2025, 02, 19));
-        fnSchedule.GameWeek.AddRange(secondWeek.GameWeek.Take(2));
+
+        fnSchedule = await FNFData.GetTournamentScheduleAsync();
     }
 
     private string GetFlagEmoji(string teamCode)
