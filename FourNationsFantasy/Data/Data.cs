@@ -1,4 +1,6 @@
 using Dapper;
+using Nhl.Api.Enumerations.Game;
+using Nhl.Api.Models.Player;
 using Npgsql;
 
 namespace FourNationsFantasy.Data;
@@ -51,6 +53,8 @@ public interface IFNFData
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
+    Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId);
+    Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId);
     Task DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
     Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId);
@@ -61,6 +65,9 @@ public interface IFNFData
 
 public class FNFData : QueryDapperBase, IFNFData
 {
+    private readonly DateOnly FirstDate = new DateOnly(2025, 02, 12);
+    private readonly DateOnly LastDate = new DateOnly(2025, 02, 17);
+    
     private readonly Nhl.Api.INhlApi _nhlApi;
     public FNFData(string connectionString, ICacheService cacheService, Nhl.Api.INhlApi nhlApi) : base(connectionString, cacheService)
     {
@@ -144,6 +151,45 @@ public class FNFData : QueryDapperBase, IFNFData
                         P.user_id = @UserId";
         
         return await QueryDbAsync<FNFPlayer>(sql, new { UserId = userId });
+    }
+
+    public async Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId)
+    {
+        var roster = (await GetRosterAsync(userId)).ToList();
+
+        List<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)> gameLogs = new();
+
+        foreach (var player in roster.Where(x => x.Position != "G"))
+        {
+            var gameLog = (await _nhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
+                Nhl.Api.Enumerations.Game.GameType.RegularSeason)).PlayerGameLogs;
+
+            gameLog = gameLog.Where(g =>
+            {
+                var gameDate = DateOnly.Parse(g.GameDate);
+                return gameDate > FirstDate && gameDate < LastDate;
+            }).ToList();
+            
+            gameLogs.Add((player, gameLog));
+        }
+
+        return gameLogs;
+    }
+    
+    public async Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId)
+    {
+        var roster = (await GetRosterAsync(userId)).ToList();
+
+        List<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)> gameLogs = new();
+
+        foreach (var player in roster.Where(x => x.Position == "G"))
+        {
+            var gameLog = (await _nhlApi.GetGoalieSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
+                Nhl.Api.Enumerations.Game.GameType.RegularSeason)).GoalieGameLogs;
+            gameLogs.Add((player, gameLog));
+        }
+
+        return gameLogs;
     }
 
     public async Task DraftPlayerAsync(FNFPlayer player, User user)

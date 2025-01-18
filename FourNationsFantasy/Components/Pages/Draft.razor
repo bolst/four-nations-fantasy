@@ -71,7 +71,7 @@
                 
                 <MudPaper Class="pa-2" Style="background-color: var(--mud-palette-background-grey);">
                     <MudGrid>
-                        @foreach (var player in filteredPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
+                        @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
                         {
                             <MudItem xs="6" Class="pa-1">
                                 <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1") Height="90px" @onclick=@(() => RowClicked(player))>
