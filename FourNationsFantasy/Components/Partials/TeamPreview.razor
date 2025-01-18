@@ -1,3 +1,5 @@
+@inject Data.ScoreCalculationService ScoreCalculator
+
 @if (User is not null)
 {
     <a href=@($"roster/{User.Id}")>

@@ -51,7 +51,6 @@ public interface IFNFData
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
-    Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync();
     Task DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
     Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId);
@@ -147,23 +146,6 @@ public class FNFData : QueryDapperBase, IFNFData
         return await QueryDbAsync<FNFPlayer>(sql, new { UserId = userId });
     }
 
-    public async Task<IEnumerable<FNFPlayer>> GetDraftAvailablePlayersAsync()
-    {
-        string sql = @"SELECT
-                        P.nhl_id AS NhlId,
-                        P.firstname AS FirstName,
-                        P.lastname AS LastName,
-                        P.position AS Position,
-                        P.nationality AS Nationality,
-                        P.user_id AS UserId,
-                        P.draft_number AS DraftNumber
-                      FROM
-                        players P
-                      WHERE
-                        P.user_id IS NULL";
-        return await QueryDbAsync<FNFPlayer>(sql);
-    }
-    
     public async Task DraftPlayerAsync(FNFPlayer player, User user)
     {
         string draftNumberSql = @"SELECT
