@@ -1,3 +1,5 @@
+@inject Data.ScoreCalculationService ScoreCalculator
+
 @if (GameLogs is not null)
 {
 <MudSimpleTable Dense>
@@ -18,7 +20,7 @@
         <MudText Typo="Typo.caption">@game.GameDate v @game.OpponentAbbrev</MudText>
     </tr>
     <tr>
-        <td>0.00</td>
+        <td>@ScoreCalculator.CalculatePlayerGameScore(game).ToString("F2")</td>
         <td>@game.Goals</td>
         <td>@game.Assists</td>
         <td>@game.PowerPlayPoints</td>

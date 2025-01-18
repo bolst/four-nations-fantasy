@@ -47,7 +47,9 @@ public class CacheService : ICacheService
 
 public class ScoreCalculationService
 {
-
+    private readonly DateOnly FirstDate = new DateOnly(2025, 02, 12);
+    private readonly DateOnly LastDate = new DateOnly(2025, 02, 17);
+    
     public const double Goal = 3;
     public const double Assist = 1;
     public const double PowerplayPoint = 0.5;
@@ -60,16 +62,21 @@ public class ScoreCalculationService
     public const double GoalieSave = 0.2;
     public const double GoalieShutout = 5;
     
-    public double CalculatePlayerScore(Nhl.Api.Models.Player.PlayerProfile profile)
+    public double CalculatePlayerGameScore(Nhl.Api.Models.Game.PlayerGameLog gameLog)
     {
-        // TODO
-        return 0.0;
+        return gameLog.Goals * Goal
+               + gameLog.Assists * Assist
+               + gameLog.PowerPlayPoints * PowerplayPoint
+               + gameLog.ShorthandedPoints * ShorthandedPoint
+               + gameLog.Shots * ShotOnGoal;
     }    
     
-    public double CalculateGoalieScore(Nhl.Api.Models.Player.PlayerProfile profile)
+    public double CalculateGoalieGameScore(Nhl.Api.Models.Game.GoalieGameLog gameLog)
     {
-        // TODO
-        return 0.0;
+        return (gameLog.Decision is not null && gameLog.Decision.Equals("W") ? 1 : 0) * GoalieWin
+            + gameLog.GoalsAgainst * GoalieGoalAgainst
+            + (gameLog.ShotsAgainst - gameLog.GoalsAgainst) * GoalieSave
+            + gameLog.Shutouts * GoalieShutout;
     }
 
     public IEnumerable<(string, double)> Categories()
@@ -79,8 +86,8 @@ public class ScoreCalculationService
         yield return ("Powerplay Point", PowerplayPoint);
         yield return ("Shorthanded Point", ShorthandedPoint);
         yield return ("Shot on Goal", ShotOnGoal);
-        yield return ("Hit", Hit);
-        yield return ("Block", Block);
+        // yield return ("Hit", Hit);
+        // yield return ("Block", Block);
         yield return ("Goalie Win", GoalieWin);
         yield return ("Goalie Goal Against", GoalieGoalAgainst);
         yield return ("Goalie Save", GoalieSave);

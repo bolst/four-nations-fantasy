@@ -94,6 +94,10 @@
 {
     <PlayerOverlay @bind-Visible="_playerOverlayVisible" PlayerInfo="overlayPlayerInfo" />
 }
+else if (overlayGoalieInfo is not null)
+{
+    <GoalieOverlay @bind-Visible="_goalieOverlayVisible" PlayerInfo="overlayGoalieInfo" />
+}
 
 @code {
     private HubConnection? hubConnection;
@@ -122,9 +126,26 @@
             }
         }
     }
-    private bool playerOverlayVisible = false;
+    private bool playerOverlayVisible = false;    
+    
+    private bool _goalieOverlayVisible
+    {
+        get => goalieOverlayVisible;
+        set
+        {
+            goalieOverlayVisible = value;
+            if (!goalieOverlayVisible)
+            {
+                overlayPlayer = null;
+                overlayGoalieInfo = null;
+            }
+        }
+    }
+    private bool goalieOverlayVisible = false;
+    
     private Data.FNFPlayer? overlayPlayer;
     private Nhl.Api.Models.Player.PlayerProfile? overlayPlayerInfo;
+    private Nhl.Api.Models.Player.GoalieProfile? overlayGoalieInfo;
 
     private string _selectedNationality
     {
@@ -198,9 +219,17 @@
 
     private async Task RowClicked(Data.FNFPlayer player)
     {
-        playerOverlayVisible = true;
         overlayPlayer = player;
-        overlayPlayerInfo = await FNFData.GetPlayerProfileByIdAsync(player.NhlIdInt);
+        if (player.Position == "G")
+        {
+            goalieOverlayVisible = true;
+            overlayGoalieInfo = await FNFData.GetGoalieProfileByIdAsync(player.NhlIdInt);
+        }
+        else
+        {
+            playerOverlayVisible = true;
+            overlayPlayerInfo = await FNFData.GetPlayerProfileByIdAsync(player.NhlIdInt);
+        }
     }
 
     private Func<Data.FNFPlayer, bool> quickFilter => x =>
@@ -273,4 +302,5 @@
         await hubConnection.StartAsync();
     }
 }
+
 

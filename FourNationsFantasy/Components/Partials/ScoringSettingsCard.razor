@@ -1,7 +1,7 @@
-@inject Data.ScoreCalculationService ScoreCalculationService
+@inject Data.ScoreCalculationService ScoreCalculator
 
 <MudPaper Class="pa-8">
-    @foreach ((string name, double value) in ScoreCalculationService.Categories())
+    @foreach ((string name, double value) in ScoreCalculator.Categories())
     {
         <MudStack Class="my-3" Row="true" Justify="Justify.SpaceBetween" Spacing="20">
             <MudText>@name</MudText>
