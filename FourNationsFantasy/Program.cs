@@ -17,6 +17,7 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddSingleton<INhlApi, NhlApi>();
+builder.Services.AddScoped<ScoreCalculationService>();
 
 builder.Services.AddScoped<IFNFData>(provider =>
 {

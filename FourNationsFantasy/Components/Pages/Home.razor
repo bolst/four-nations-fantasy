@@ -6,6 +6,14 @@
 
 <PageTitle>Four Nations Fantasy</PageTitle>
 
+<div class="d-flex justify-end">
+    <MudIconButton OnClick=@( () => overlayVisible = true ) Icon="@Icons.Material.Filled.Info" />
+</div>
+
+<MudOverlay @bind-Visible="overlayVisible" DarkBackground AutoClose>
+    <ScoringSettingsCard />
+</MudOverlay>
+
 @if (Users is not null)
 {
     <MudGrid>
@@ -21,6 +29,8 @@
 @code{
 
     private IEnumerable<Data.User>? Users;
+
+    private bool overlayVisible = false;
     
     protected override async Task OnInitializedAsync()
     {
