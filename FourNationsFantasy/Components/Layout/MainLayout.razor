@@ -1,5 +1,9 @@
 ﻿@inherits LayoutComponentBase
 
+@inject NavigationManager Navigation
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject Data.CustomUserService CustomUserService
+
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
@@ -8,6 +12,12 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
+        
+        <AuthorizeView Roles="masq">
+            <MudText Color="Color.Error">Masquerading (@currentUser.Email)</MudText>
+            <MudButton OnClick="EndMasquerade" Class="mx-2" Color="Color.Error" Variant="Variant.Filled" Size="Size.Small">End</MudButton>
+        </AuthorizeView>
+        
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
@@ -49,6 +59,8 @@
     private bool _isDarkMode = true;
     private MudTheme? _theme = null;
 
+    private Data.User currentUser => CustomAuthenticationStateProvider.CurrentUser;
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
@@ -59,6 +71,12 @@
             PaletteDark = _darkPalette,
             LayoutProperties = new LayoutProperties()
         };
+    }
+
+    private async Task EndMasquerade()
+    {
+        await CustomUserService.EndMasquerade();
+        Navigation.NavigateTo("/", true);
     }
 
 

@@ -113,6 +113,8 @@ public class FNFData : QueryDapperBase, IFNFData
     
     public async Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync()
     {
+        string cacheKey = "all_players";
+        
         string sql = @"SELECT
                           nhl_id AS NhlId,
                           firstname AS FirstName,
@@ -123,7 +125,7 @@ public class FNFData : QueryDapperBase, IFNFData
                           draft_number AS DraftNumber
                         FROM
                           players";
-        return await QueryDbAsync<FNFPlayer>(sql);
+        return await QueryDbWithCacheAsync<FNFPlayer>(cacheKey, sql);
     }
 
     public async Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId)

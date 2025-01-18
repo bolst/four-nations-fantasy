@@ -63,25 +63,46 @@ public class CustomUserService
         await _localStorageService.SetItemAsync("login", _protector.Protect(token));
     }
 
-    public async Task<User?> FetchUserFromBrowserAsync()
+    public async Task<(User?, bool)> FetchUserFromBrowserAsync()
     {
         User user = new();
 
         try
         {
-            user.Email = _protector.Unprotect(await _localStorageService.GetItemAsync<string>("user"));
-            return user;
+            var masq = await _localStorageService.GetItemAsync<string>("masq");
+
+            if (masq is null)
+            {
+                user.Email = _protector.Unprotect(await _localStorageService.GetItemAsync<string>("user"));
+            }
+            else
+            {
+                user.Email = _protector.Unprotect(masq);
+            }
+
+            return (user, masq is not null);
         }
         catch
         {
-            return null;
+            return (null, false);
         }
+    }
+
+    public async Task BeginMasquerade(User user)
+    {
+        await _localStorageService.SetItemAsync("masq", _protector.Protect(user.Email));
+    }
+
+    public async Task EndMasquerade()
+    {
+        await _localStorageService.RemoveItemAsync("masq");
     }
 
     public async Task LogoutAsync()
     {
         await _localStorageService.RemoveItemAsync("user");
         await _localStorageService.RemoveItemAsync("login");
+        await _localStorageService.RemoveItemAsync("masq");
         await _supabase.Auth.SignOut();
     }
 

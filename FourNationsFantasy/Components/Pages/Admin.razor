@@ -72,7 +72,8 @@
     {
         if (selectedUser is not null)
         {
-            // TODO
+            await CustomUserService.BeginMasquerade(selectedUser);
+            Navigation.NavigateTo("/", true);
         }
     }
 }

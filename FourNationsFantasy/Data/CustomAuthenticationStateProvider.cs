@@ -26,7 +26,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         var principal = new ClaimsPrincipal();
-        User? user = await _userService.FetchUserFromBrowserAsync();
+        (User? user, bool isMasq) = await _userService.FetchUserFromBrowserAsync();
 
         if (user?.Email is not null)
         {
@@ -34,6 +34,10 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 
             if (userInDb is not null)
             {
+                if (isMasq)
+                {
+                    userInDb.Role = "masq";
+                }
                 principal = userInDb.ToClaimsPrincipal();
                 CurrentUser = userInDb;
             }
