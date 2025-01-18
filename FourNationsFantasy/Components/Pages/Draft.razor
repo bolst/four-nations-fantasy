@@ -172,32 +172,8 @@
         filteredPlayers = allPlayers;
         
         teams = await FNFData.GetAllUsersAsync();
-        
-        // SignalR logic
-        string hubUrl = Navigation.BaseUri.TrimEnd('/') + Hubs.DraftHub.HubUrl;
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(hubUrl)
-            .Build();
 
-        hubConnection.On<Data.FNFPlayer, Data.User>("DraftPlayer", async (player, user) =>
-        {
-            (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
-
-            allPlayers = allPlayers.Select(p =>
-            {
-                if (p.Equals(player))
-                {
-                    p.UserId = user.Id;
-                    p.DraftNumber = currentPick - 1;
-                }
-                return p;
-            });
-            filteredPlayers = allPlayers;
-            
-            InvokeAsync(StateHasChanged);
-        });
-            
-        await hubConnection.StartAsync();
+        await initializeHubConnection();
     }
 
     private void InitiateDraft(Data.FNFPlayer player)
@@ -269,6 +245,32 @@
         };
     }
 
-    private bool IsForwardOrDefense(string position) => position is "F" or "D";
+    private async Task initializeHubConnection()
+    {
+        string hubUrl = Navigation.BaseUri.TrimEnd('/') + Hubs.DraftHub.HubUrl;
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl)
+            .Build();
+
+        hubConnection.On<Data.FNFPlayer, Data.User>("DraftPlayer", async (player, user) =>
+        {
+            (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
+
+            allPlayers = allPlayers.Select(p =>
+            {
+                if (p.Equals(player))
+                {
+                    p.UserId = user.Id;
+                    p.DraftNumber = currentPick - 1;
+                }
+                return p;
+            });
+            filteredPlayers = allPlayers;
+            
+            InvokeAsync(StateHasChanged);
+        });
+            
+        await hubConnection.StartAsync();
+    }
 }
 
