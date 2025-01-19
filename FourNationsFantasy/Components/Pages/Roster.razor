@@ -6,6 +6,13 @@
 
 <PageTitle>Roster</PageTitle>
 
+@if (user is not null)
+{
+    <div class="pa-2 mb-8">
+        <MudText Typo="Typo.h4" HtmlTag="i"><b>@user.TeamName</b></MudText>
+    </div>
+}
+
 @if (userRoster is not null)
 {
     @foreach (var player in userRoster)
