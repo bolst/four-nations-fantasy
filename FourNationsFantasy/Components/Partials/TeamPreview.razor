@@ -4,7 +4,7 @@
 @if (User is not null)
 {
     <a href=@($"roster/{User.Id}")>
-        <MudPaper Class="pa-3" Style="background-color: transparent;">
+        <MudPaper Class="pa-3 mud-theme-surface" Elevation="3">
             <MudStack Style="min-height: 100px" Row="true" AlignItems="AlignItems.Center">
                 <MudAvatar Color="Color.Primary">@User.TeamName.First()</MudAvatar>
                 <MudText Typo="Typo.subtitle2">@User.TeamName</MudText>

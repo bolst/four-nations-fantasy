@@ -18,7 +18,7 @@
     </MudStack>
 }
 
-<MudPaper Class="my-2">
+<MudPaper Class="my-2" Elevation="3">
     @if (filteredPlayers is not null)
     {
         <MudTabs PanelClass="pa-4" Centered>
@@ -69,22 +69,20 @@
                 
                 <br />
                 
-                <MudPaper Class="pa-2" Style="background-color: var(--mud-palette-background-grey);">
-                    <MudGrid>
-                        @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
-                        {
-                            <MudItem xs="6" Class="pa-1">
-                                <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1") Height="90px" @onclick=@(() => RowClicked(player))>
-                                    <div class="d-flex justify-space-between align-center">
-                                        <MudText Typo="Typo.caption">@player.Position - @teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName</MudText>
-                                        <MudText Typo="Typo.caption">@player.DraftNumber</MudText>
-                                    </div>
-                                    <MudText Typo="Typo.body1"><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
-                                </MudPaper>
-                            </MudItem>
-                        }
-                    </MudGrid>
-                </MudPaper>
+                <MudGrid Class="px-2">
+                    @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
+                    {
+                        <MudItem xs="6" Class="pa-1">
+                            <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1") Height="90px" @onclick=@(() => RowClicked(player))>
+                                <div class="d-flex justify-space-between align-center">
+                                    <MudText Typo="Typo.caption">@player.Position - @teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName</MudText>
+                                    <MudText Typo="Typo.caption">@player.DraftNumber</MudText>
+                                </div>
+                                <MudText Typo="Typo.body1"><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
             </MudTabPanel>
         </MudTabs>
     }
