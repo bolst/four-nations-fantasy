@@ -98,6 +98,18 @@ public class CustomUserService
         await _localStorageService.RemoveItemAsync("masq");
     }
 
+    public async Task ChangeUserTheme(bool isDark)
+    {
+        var themeStr = isDark ? "dark" : "light";
+        await _localStorageService.SetItemAsync("theme", themeStr);
+    }
+
+    public async Task<bool> IsUserThemeDark()
+    {
+        var themeStr = await _localStorageService.GetItemAsync<string>("theme");
+        return string.IsNullOrEmpty(themeStr) || themeStr == "dark";
+    }
+
     public async Task LogoutAsync()
     {
         await _localStorageService.RemoveItemAsync("user");

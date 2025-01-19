@@ -73,6 +73,14 @@
         };
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await CustomUserService.IsUserThemeDark();
+        }
+    }
+
     private async Task EndMasquerade()
     {
         await CustomUserService.EndMasquerade();
@@ -85,9 +93,10 @@
         _drawerOpen = !_drawerOpen;
     }
 
-    private void DarkModeToggle()
+    private async Task DarkModeToggle()
     {
         _isDarkMode = !_isDarkMode;
+        await CustomUserService.ChangeUserTheme(_isDarkMode);
     }
 
     private readonly PaletteLight _lightPalette = new()
