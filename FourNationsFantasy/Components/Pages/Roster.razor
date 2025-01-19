@@ -1,3 +1,4 @@
+@page "/roster"
 @page "/roster/{userId:int}"
 
 @inject Data.IFNFData FNFData
@@ -15,16 +16,33 @@
 
 @if (userRoster is not null)
 {
-    @foreach (var player in userRoster)
+    <MudText>Forwards</MudText>
+    @foreach (var player in userRoster.Where(p => p.Position == "F"))
     {
         <PlayerPointCard Player="@player" />
+    }    
+    
+    <br />
+    
+    <MudText>Defensemen</MudText>
+    @foreach (var player in userRoster.Where(p => p.Position == "D"))
+    {
+        <PlayerPointCard Player="@player" />
+    }    
+    
+    <br />
+
+    <MudText>Goalies</MudText>
+    @foreach (var player in userRoster.Where(p => p.Position == "G"))
+    {
+        <GoaliePointCard Player="@player" />
     }
 }
 
 @code {
     
     [Parameter]
-    public int userId { get; set; }
+    public int? userId { get; set; }
 
     private Data.User? user;
     private IEnumerable<Data.FNFPlayer>? userRoster;
@@ -35,8 +53,17 @@
         {
             Navigation.NavigateTo("/");
         }
+
+        if (userId is null)
+        {
+            user = CustomAuthenticationStateProvider.CurrentUser;
+        }
+        else
+        {
+            user = await FNFData.GetUserByIdAsync(userId.Value);
+        }
         
-        user = await FNFData.GetUserByIdAsync(userId);
+        
         if (user is not null)
         {
             userRoster = await FNFData.GetRosterAsync(user.Id);

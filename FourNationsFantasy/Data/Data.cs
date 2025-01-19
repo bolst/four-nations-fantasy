@@ -167,7 +167,7 @@ public class FNFData : QueryDapperBase, IFNFData
             gameLog = gameLog.Where(g =>
             {
                 var gameDate = DateOnly.Parse(g.GameDate);
-                return gameDate > FirstDate && gameDate < LastDate;
+                return gameDate >= FirstDate && gameDate <= LastDate;
             }).ToList();
             
             gameLogs.Add((player, gameLog));
@@ -186,6 +186,13 @@ public class FNFData : QueryDapperBase, IFNFData
         {
             var gameLog = (await _nhlApi.GetGoalieSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
                 Nhl.Api.Enumerations.Game.GameType.RegularSeason)).GoalieGameLogs;
+            
+            gameLog = gameLog.Where(g =>
+            {
+                var gameDate = DateOnly.Parse(g.GameDate);
+                return gameDate >= FirstDate && gameDate <= LastDate;
+            }).ToList();
+            
             gameLogs.Add((player, gameLog));
         }
 
