@@ -142,6 +142,8 @@ public class FNFData : QueryDapperBase, IFNFData
                           goalie_gaa AS GoalieGAA,
                           goalie_sv_pctg AS GoalieSvPctg,
                           goalie_shutouts AS GoalieShutouts,
+                          goalie_saves AS GoalieSaves,
+                          goalie_goals_against AS GoalieGoalsAgainst,
                           headshot AS Headshot,
                           hero_image AS HeroImage
                         FROM

@@ -79,6 +79,32 @@ public class ScoreCalculationService
             + gameLog.Shutouts * GoalieShutout;
     }
 
+    public double CalculatePlayerSeasonScore(FNFPlayer player)
+    {
+        if (player.Position == "G") return CalculateGoalieSeasonScore(player);
+        
+        return CalculateSkaterSeasonScore(player);
+    }
+
+    public double CalculateSkaterSeasonScore(FNFPlayer player)
+    {
+        return player.Goals * Goal
+               + player.Assists * Assist
+               + player.PowerplayPoints * PowerplayPoint
+               + player.ShorthandedPoints * ShorthandedPoint
+               + player.SOG * ShotOnGoal
+               + player.Hits * Hit
+               + player.Blocks * Block; 
+    }
+    
+    public double CalculateGoalieSeasonScore(FNFPlayer player)
+    {
+        return player.GoalieWins * GoalieWin
+               + player.GoalieGoalsAgainst * GoalieGoalAgainst
+               + player.GoalieSaves * GoalieSave
+               + player.GoalieShutouts * GoalieShutout;
+    }
+
     public IEnumerable<(string, double)> Categories()
     {
         yield return ("Goal", Goal);
