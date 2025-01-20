@@ -12,7 +12,7 @@
             <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
                 @if (playerProfiles is not null && goalieProfiles is not null)
                 {
-                    <MudText Typo="Typo.body2">@(PlayerGamesPlayed + GoalieGamesPlayed)/60 games played</MudText>
+                    <MudText Typo="Typo.body2">@(PlayerGamesPlayed + GoalieGamesPlayed)/45 games played</MudText>
                     <MudText Typo="Typo.body2">@((PlayerPointTotal + GoaliePointTotal).ToString("F2")) points</MudText>
                 }
                 else
