@@ -86,8 +86,8 @@ public class ScoreCalculationService
         yield return ("Powerplay Point", PowerplayPoint);
         yield return ("Shorthanded Point", ShorthandedPoint);
         yield return ("Shot on Goal", ShotOnGoal);
-        // yield return ("Hit", Hit);
-        // yield return ("Block", Block);
+        yield return ("Hit", Hit);
+        yield return ("Block", Block);
         yield return ("Goalie Win", GoalieWin);
         yield return ("Goalie Goal Against", GoalieGoalAgainst);
         yield return ("Goalie Save", GoalieSave);

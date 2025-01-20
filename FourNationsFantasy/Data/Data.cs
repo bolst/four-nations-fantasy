@@ -129,10 +129,24 @@ public class FNFData : QueryDapperBase, IFNFData
                           position AS Position,
                           nationality AS Nationality,
                           user_id AS UserId,
-                          draft_number AS DraftNumber
+                          draft_number AS DraftNumber,
+                          games_played AS GamesPlayed,
+                          goals AS Goals,
+                          assists AS Assists,
+                          pp_points AS PowerplayPoints,
+                          sh_points AS ShorthandedPoints,
+                          shots_on_goal AS SOG,
+                          hits AS Hits,
+                          blocks AS Blocks,
+                          goalie_wins AS GoalieWins,
+                          goalie_gaa AS GoalieGAA,
+                          goalie_sv_pctg AS GoalieSvPctg,
+                          goalie_shutouts AS GoalieShutouts,
+                          headshot AS Headshot,
+                          hero_image AS HeroImage
                         FROM
                           players";
-        return await QueryDbWithCacheAsync<FNFPlayer>(cacheKey, sql);
+        return await QueryDbAsync<FNFPlayer>(sql);
     }
 
     public async Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId)
@@ -144,7 +158,21 @@ public class FNFData : QueryDapperBase, IFNFData
                         P.position AS Position,
                         P.nationality AS Nationality,
                         P.user_id AS UserId,
-                        P.draft_number AS DraftNumber
+                        P.draft_number AS DraftNumber,
+                        P.games_played AS GamesPlayed,
+                        P.goals AS Goals,
+                        P.assists AS Assists,
+                        P.pp_points AS PowerplayPoints,
+                        P.sh_points AS ShorthandedPoints,
+                        P.shots_on_goal AS SOG,
+                        P.hits AS Hits,
+                        P.blocks AS Blocks,
+                        P.goalie_wins AS GoalieWins,
+                        P.goalie_gaa AS GoalieGAA,
+                        P.goalie_sv_pctg AS GoalieSvPctg,
+                        P.goalie_shutouts AS GoalieShutouts,
+                        P.headshot AS Headshot,
+                        P.hero_image AS HeroImage
                       FROM
                         players P
                       WHERE

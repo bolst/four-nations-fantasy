@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @inject Data.IFNFData FNFData
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
-@inject Nhl.Api.INhlApi NhlApi
 @inject NavigationManager Navigation
 
 <PageTitle>Draft</PageTitle>
@@ -88,14 +87,9 @@
     }
 </MudPaper>
 
-@if (overlayPlayerInfo is not null)
-{
-    <PlayerOverlay @bind-Visible="_playerOverlayVisible" PlayerInfo="overlayPlayerInfo" />
-}
-else if (overlayGoalieInfo is not null)
-{
-    <GoalieOverlay @bind-Visible="_goalieOverlayVisible" PlayerInfo="overlayGoalieInfo" />
-}
+<PlayerOverlay @bind-Visible="_playerOverlayVisible" PlayerInfo="overlayPlayer" />
+
+<GoalieOverlay @bind-Visible="_goalieOverlayVisible" PlayerInfo="overlayPlayer" />
 
 @code {
     private HubConnection? hubConnection;
@@ -120,7 +114,10 @@ else if (overlayGoalieInfo is not null)
             if (!playerOverlayVisible)
             {
                 overlayPlayer = null;
-                overlayPlayerInfo = null;
+            }
+            else
+            {
+                _goalieOverlayVisible = false;
             }
         }
     }
@@ -135,15 +132,16 @@ else if (overlayGoalieInfo is not null)
             if (!goalieOverlayVisible)
             {
                 overlayPlayer = null;
-                overlayGoalieInfo = null;
+            }
+            else
+            {
+                _playerOverlayVisible = false;
             }
         }
     }
     private bool goalieOverlayVisible = false;
     
     private Data.FNFPlayer? overlayPlayer;
-    private Nhl.Api.Models.Player.PlayerProfile? overlayPlayerInfo;
-    private Nhl.Api.Models.Player.GoalieProfile? overlayGoalieInfo;
 
     private string _selectedNationality
     {
@@ -221,12 +219,10 @@ else if (overlayGoalieInfo is not null)
         if (player.Position == "G")
         {
             goalieOverlayVisible = true;
-            overlayGoalieInfo = await FNFData.GetGoalieProfileByIdAsync(player.NhlIdInt);
         }
         else
         {
             playerOverlayVisible = true;
-            overlayPlayerInfo = await FNFData.GetPlayerProfileByIdAsync(player.NhlIdInt);
         }
     }
 

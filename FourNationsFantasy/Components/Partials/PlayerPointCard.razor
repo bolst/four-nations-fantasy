@@ -1,45 +1,34 @@
 @inject Data.IFNFData FNFData
 
-@if (Player is not null && playerProfile is not null)
+@if (Player is not null)
 {
     <MudPaper Class="pa-4 ma-2" Elevation="3" @onclick=@(() => overlayVisible = true )>
         <MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center">
                 <MudAvatar Color="Color.Surface" Size="Size.Medium" Class="mr-3">
-                    <MudImage Src="@playerProfile.Headshot" />
+                    <MudImage Src="@Player.Headshot" />
                 </MudAvatar>
                 <div>
                     <MudText Typo="Typo.h6">@Player.FirstName @Player.LastName</MudText>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                         @Player.Position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.Nationality
-                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @playerProfile.SeasonTotals.Last().Goals G &nbsp; @playerProfile.SeasonTotals.Last().Assists A &nbsp; @playerProfile.SeasonTotals.Last().Points Pts</span>
+                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @Player.Goals G &nbsp; @Player.Assists A &nbsp; @Player.Points Pts</span>
                     </MudText>
                 </div>
             </MudStack>
         </MudStack>
     </MudPaper>
+    
+    <PlayerOverlay @bind-Visible="overlayVisible" PlayerInfo="Player" />
 }
 
-@if (playerProfile is not null)
-{
-    <PlayerOverlay @bind-Visible="overlayVisible" PlayerInfo="playerProfile" />
-}
 
 @code {
     
     [Parameter]
     public Data.FNFPlayer? Player { get; set; }
 
-    private Nhl.Api.Models.Player.PlayerProfile? playerProfile;
 
     private bool overlayVisible = false;
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (Player is not null)
-        {
-            playerProfile = await FNFData.GetPlayerProfileByIdAsync(Player.NhlIdInt);
-        }
-    }
 
 }

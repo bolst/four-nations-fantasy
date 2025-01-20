@@ -11,8 +11,27 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public string Nationality { get; set; }
     public int? DraftNumber { get; set;}
     public int? UserId { get; set; }
-    
-    public Nhl.Api.Models.Player.PlayerProfile? Profile { get; set; }
+    public string? Headshot { get; set; }
+    public string? HeroImage { get; set; }
+
+    #region Season totals
+
+    public int GamesPlayed { get; set; } = 0;
+    public int? Goals { get; set; }
+    public int? Assists { get; set; }
+    public int? PowerplayPoints { get; set; }
+    public int? ShorthandedPoints { get; set; }
+    public int? SOG { get; set; }
+    public int? Hits { get; set; }
+    public int? Blocks { get; set; }
+    public int? GoalieWins { get; set; }
+    public double? GoalieGAA { get; set; }
+    public double? GoalieSvPctg { get; set; }
+    public int? GoalieShutouts { get; set; }
+
+    public int? Points => Goals + Assists;
+    #endregion
+
 
     public int NhlIdInt => int.Parse(NhlId);
 
