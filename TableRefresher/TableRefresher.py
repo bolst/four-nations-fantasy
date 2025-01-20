@@ -78,14 +78,15 @@ def update_table_player_stats(stats):
             'assists': stat['assists'],
             'pp_points': stat['ppPoints'],
             'sh_points': stat['shPoints'],
-            'shots_on_goal': stat['shots']
+            'shots_on_goal': stat['shots'],
+            'games_played': stat['gamesPlayed']
         }
         
         response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
 
 def fetch_goalie_stats_from_nhl(ids: list):
     # example url
-    # https://api.nhle.com/stats/rest/en/goalie/summary?cayenneExp=seasonId=20242025 and playerId=8480039
+    # https://api.nhle.com/stats/rest/en/goalie/summary?cayenneExp=seasonId=20242025 and playerId=8480045
 
     base_url = 'https://api.nhle.com/stats/rest/en/goalie/summary?cayenneExp=seasonId=20242025 '
     nhl_api_url = base_url + 'and ('
@@ -108,7 +109,11 @@ def update_table_goalie_stats(stats):
         entry = {
             'goalie_wins': stat['wins'],
             'goalie_gaa': stat['goalsAgainstAverage'],
-            'goalie_sv_pctg': stat['savePct']
+            'goalie_sv_pctg': stat['savePct'],
+            'games_played': stat['gamesPlayed'],
+            'goalie_shutouts': stat['shutouts'],
+            'goalie_saves': stat['saves'],
+            'goalie_goals_against': stat['goalsAgainst']
         }
         
         response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
@@ -136,4 +141,5 @@ if __name__ == '__main__':
         print('------------------\n')
         
         # sleep for 10 min
+        print('\nsleeping...\n')
         time.sleep(60 * 10)
