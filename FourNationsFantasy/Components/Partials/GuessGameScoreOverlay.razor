@@ -1,0 +1,105 @@
+@inject NavigationManager Navigation
+@inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+    
+<MudOverlay Visible="@Visible" VisibleChanged="OnVisibleChanged" DarkBackground LockScroll>
+    <MudPaper Class="pa-4">
+        <div style="width: 100%" class="d-flex justify-end">
+            <MudIconButton OnClick=@( async () => await OnVisibleChanged(false) ) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small" />
+        </div>
+        <MudSwipeArea OnSwipeEnd="@((e) => OnSwipe(e))">
+            <MudStack Class="px-4" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h5">Guess score of @Game.AwayTeam.Abbrev vs @Game.HomeTeam.Abbrev</MudText>
+                
+                <MudStack Class="px-8" Spacing="10" Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudStack>
+                        <MudNumericField @bind-Value="@awayScoreInput" Label="@Game.AwayTeam.Abbrev" Min="0" HideSpinButtons />
+                    </MudStack>
+                    
+                    <MudStack>
+                        <MudNumericField @bind-Value="@homeScoreInput" Label="@Game.HomeTeam.Abbrev" Min="0" HideSpinButtons />
+                    </MudStack>
+                </MudStack>
+                
+                @if (scoreConfirmed)
+                {
+                    <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="OnGuessScore" FullWidth>Confirm</MudButton>
+                }
+                else
+                {
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ConfirmScore" FullWidth>Guess Score</MudButton>
+                }
+                
+                @if (errorMessage is not null)
+                {
+                    <MudText Color="Color.Error">@errorMessage</MudText>
+                }
+            </MudStack>
+        </MudSwipeArea>
+    </MudPaper>
+</MudOverlay>
+
+@code {
+    
+    [Parameter]
+    public bool Visible { get; set; }
+    
+    [Parameter]
+    public EventCallback<bool> VisibleChanged { get; set; }
+
+    [Parameter]
+    public Nhl.Api.Models.Schedule.Game Game { get; set; }
+    
+    [Parameter]
+    public EventCallback<bool> OnGuess { get; set; }
+    
+    private int awayScoreInput;
+    private int homeScoreInput;
+    private bool scoreConfirmed;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (homeScoreInput, awayScoreInput) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.Id);
+    }
+
+    private async Task OnVisibleChanged(bool visible)
+    {
+        Visible = visible;
+        await VisibleChanged.InvokeAsync(visible);
+    }
+
+    private async Task OnSwipe(SwipeEventArgs swipeArgs)
+    {
+        if (swipeArgs.SwipeDirection == SwipeDirection.TopToBottom)
+        {
+            await OnVisibleChanged(false);
+        }
+    }
+
+    private void ConfirmScore()
+    {
+        if (homeScoreInput == awayScoreInput)
+        {
+            errorMessage = "what kind of guess is that";
+        }
+        else
+        {
+            errorMessage = string.Empty;
+            scoreConfirmed = true;
+        }
+    }
+
+    private async Task OnGuessScore()
+    {
+        if (scoreConfirmed)
+        {
+            await FNFData.AddPlayerGameGuess(Game.Id, CustomAuthenticationStateProvider.CurrentUser.Id, homeScoreInput, awayScoreInput);
+            await OnVisibleChanged(false);
+            await OnGuess.InvokeAsync(false);
+        }
+        
+        scoreConfirmed = false;
+    }
+}

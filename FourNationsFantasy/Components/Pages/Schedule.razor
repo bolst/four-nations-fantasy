@@ -12,11 +12,12 @@
         <MudStack Spacing="4">
             @foreach (var day in fnSchedule.GameWeek)
             {
-                @if (day.Games.Count() > 0)
+                if (day.Games.Count() > 0)
                 {
                     <MudText><b>@(DateTime.Parse(day.Date).ToString("dddd, MMMM dd"))</b></MudText>
                 }
-                @foreach (var game in day.Games)
+                
+                foreach (var game in day.Games)
                 {
                     <GameMatchupCard Game="@game" />
                 }

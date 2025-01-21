@@ -1,31 +1,67 @@
-<MudPaper Class="pa-4" Style="max-width: 100%;" Elevation="3">
-    <MudGrid>
-        <MudItem Class="d-flex align-center justify-center" xs="7">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
-                <MudStack AlignItems="AlignItems.Center">
-                    <MudText>@Game.AwayTeam.Abbrev</MudText>
-                    <MudText Color="Color.Surface">@Game.AwayTeam.Score</MudText>
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject Data.IFNFData FNFData
+
+@if (Game is not null)
+{
+    <MudPaper Class="pa-4" Style="max-width: 100%;" Elevation="3">
+        <MudGrid>
+            <MudItem Class="d-flex align-center justify-center" xs="7">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudText>@Game.AwayTeam.Abbrev</MudText>
+                        <MudText Color="Color.Surface">@Game.AwayTeam.Score</MudText>
+                    </MudStack>
+                    <MudText Color="Color.Surface" Class="mx-2">vs</MudText>
+                    <MudStack AlignItems="AlignItems.Center">
+                        <MudText>@Game.HomeTeam.Abbrev</MudText>
+                        <MudText Color="Color.Surface">@Game.HomeTeam.Score</MudText>
+                    </MudStack>
                 </MudStack>
-                <MudText Color="Color.Surface" Class="mx-2">vs</MudText>
-                <MudStack AlignItems="AlignItems.Center">
-                    <MudText>@Game.HomeTeam.Abbrev</MudText>
-                    <MudText Color="Color.Surface">@Game.HomeTeam.Score</MudText>
+            </MudItem>
+            <MudItem xs="5">
+                <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                    <MudText Color="Color.Surface">@Game.StartTimeUTC.AddHours(-5).ToString("hh:mm tt")</MudText>
+                    <MudText Color="Color.Surface">@Game.Venue.Default</MudText>
+                    
+                    @if (userHasNotGuessed)
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick=@( () => _overlayVisible = true ) StartIcon="@Icons.Material.Filled.Scoreboard">Guess Score</MudButton>
+                    }
+                    else
+                    {
+                        <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick=@( () => _overlayVisible = true ) StartIcon="@Icons.Material.Filled.Edit">Edit Guess</MudButton>
+                    }
                 </MudStack>
-            </MudStack>
-        </MudItem>
-        <MudItem xs="5">
-            <MudStack AlignItems="AlignItems.Center" Spacing="2">
-                <MudText Color="Color.Surface">@Game.StartTimeUTC.AddHours(-5).ToString("hh:mm tt")</MudText>
-                <MudText Color="Color.Surface">@Game.Venue.Default</MudText>
-                <MudButton Color="Color.Primary" Variant="Variant.Filled">Guess Score</MudButton>
-            </MudStack>
-        </MudItem>
-    </MudGrid>
-</MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <GuessGameScoreOverlay @bind-Visible="_overlayVisible" Game="Game" OnGuess="OnGuess" />
+}
 
 @code{
 
     [Parameter]
     public Nhl.Api.Models.Schedule.Game Game { get; set; }
 
+    private bool _overlayVisible { get; set; }
+    private bool overlayVisible = false;
+
+    private bool userHasNotGuessed = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (Game is not null)
+        {
+            (int homeScore, int awayScore) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.Id);
+            
+            // this is only scenario where user has guessed yet
+            userHasNotGuessed = homeScore == 0 && awayScore == 0;
+        }
+    }
+
+    private void OnGuess(bool status)
+    {
+        userHasNotGuessed = status;
+    }
 }

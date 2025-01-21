@@ -61,6 +61,8 @@ public interface IFNFData
     Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId);
     Task UpdateTeamNameAsync(Data.User user, string newName);
     Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync();
+    Task<(int, int)> GetPlayerGameGuessAsync(int gameId, int userId);
+    Task AddPlayerGameGuess(int gameId, int userId, int homeScore, int awayScore);
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -307,6 +309,27 @@ public class FNFData : QueryDapperBase, IFNFData
             
             return schedule;
         }, CacheDuration);
+    }
+
+    public async Task<(int, int)> GetPlayerGameGuessAsync(int gameId, int userId)
+    {
+        string sql = @"SELECT
+                          home_score_guess,
+                          away_score_guess
+                        FROM
+                          game_guesses
+                        WHERE
+                          nhl_game_id = @GameId
+                          AND user_id = @UserId";
+        return await QueryDbSingleAsync<(int, int)>(sql, new { GameId = gameId, UserId = userId });
+    }
+    public async Task AddPlayerGameGuess(int gameId, int userId, int homeScore, int awayScore)
+    {
+        string sql = @"INSERT INTO game_guesses (user_id, nhl_game_id, home_score_guess, away_score_guess)
+                        VALUES (@UserId, @GameId, @HomeScore, @AwayScore)
+                        ON CONFLICT (user_id, nhl_game_id)
+                        DO UPDATE SET user_id = @UserId, nhl_game_id = @GameId, home_score_guess = @HomeScore, away_score_guess = @AwayScore";
+        await ExecuteSqlAsync(sql, new { GameId = gameId, UserId = userId, HomeScore = homeScore, AwayScore = awayScore });
     }
 
 }
