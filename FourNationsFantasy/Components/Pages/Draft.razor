@@ -8,7 +8,7 @@
 
 <PageTitle>Draft</PageTitle>
 
-@if (currentUserPick is not null && currentPick != 0)
+@if (currentUserPick is not null && currentPick != 0 && currentPick <= 90)
 {
     <MudStack Class="mb-4" Row="true" Justify="Justify.Center">
         <MudStack AlignItems="AlignItems.Center">
@@ -21,7 +21,7 @@
 <MudPaper Class="my-2" Elevation="3">
     @if (filteredPlayers is not null)
     {
-        <MudTabs PanelClass="pa-4" Centered>
+        <MudTabs PanelClass="pa-4" ActivePanelIndex=@(currentPick <= 90 ? 0 : 1) Centered>
             <MudTabPanel Text="Available Players">
                 
                 <br />

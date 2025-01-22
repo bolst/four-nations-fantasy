@@ -44,22 +44,22 @@
             <MudPaper Class="px-2 py-8">
                 
                 <MudStack Row="true" AlignItems="AlignItems.Center">
-                    @if (randomDraftConfirmed)
+                    @if (simDraftConfirmed)
                     {
-                        <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.Shuffle" IconColor="Color.Success" OnClick="OnRandomDraft" FullWidth>
-                            @if (randomDraftLoading)
+                        <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.Shuffle" IconColor="Color.Success" OnClick="OnSimDraft" FullWidth>
+                            @if (simDraftLoading)
                             {
                                 <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
                             }
                             else
                             {
-                                <MudText Typo="Typo.button">Confirm Randomize</MudText>
+                                <MudText Typo="Typo.button">Confirm Draft Sim</MudText>
                             }
                         </MudButton>
                     }
                     else
                     {
-                        <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.Shuffle" IconColor="Color.Info" OnClick=@( () => randomDraftConfirmed = true ) FullWidth>Random Draft</MudButton>
+                        <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.Shuffle" IconColor="Color.Info" OnClick=@( () => simDraftConfirmed = true ) FullWidth>Simulate Draft</MudButton>
                     }
                 </MudStack>              
                 
@@ -94,8 +94,8 @@
     private IEnumerable<Data.User>? users;
     private Data.User? selectedUser;
     private bool overlayVisible = false;
-    private bool randomDraftLoading = false;
-    private bool randomDraftConfirmed = false;
+    private bool simDraftLoading = false;
+    private bool simDraftConfirmed = false;
     private bool resetRostersLoading = false;
     private bool resetRostersConfirmed = false;
     
@@ -132,16 +132,16 @@
         }
     }
 
-    private async Task OnRandomDraft()
+    private async Task OnSimDraft()
     {
-        if (randomDraftConfirmed)
+        if (simDraftConfirmed)
         {
-            randomDraftLoading = true;
+            simDraftLoading = true;
             
-            await FNFData.RandomDraft();
+            await FNFData.SimulateDraft();
             Navigation.NavigateTo("/home");
             
-            randomDraftLoading = false;
+            simDraftLoading = false;
         }
     }
 

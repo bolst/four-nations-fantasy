@@ -63,7 +63,7 @@ public interface IFNFData
     Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync();
     Task<(int, int)> GetPlayerGameGuessAsync(int gameId, int userId);
     Task AddPlayerGameGuess(int gameId, int userId, int homeScore, int awayScore);
-    Task RandomDraft();
+    Task SimulateDraft();
     Task ResetRosters();
 }
 
@@ -335,7 +335,7 @@ public class FNFData : QueryDapperBase, IFNFData
         await ExecuteSqlAsync(sql, new { GameId = gameId, UserId = userId, HomeScore = homeScore, AwayScore = awayScore });
     }
 
-    public async Task RandomDraft()
+    public async Task SimulateDraft()
     {
         await ResetRosters();
         
