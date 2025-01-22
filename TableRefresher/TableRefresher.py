@@ -2,6 +2,7 @@ import os
 from supabase import create_client, Client
 import requests
 import time
+from datetime import datetime
 # import schedule
 
 # create supabase client
@@ -46,7 +47,8 @@ def update_table_player_realtime_stats(stats):
     for stat in stats:
         entry = {
             'hits': stat['hits'],
-            'blocks': stat['blockedShots']
+            'blocks': stat['blockedShots'],
+            'stats_last_updated': str(datetime.now())
         }
         
         response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
@@ -79,7 +81,8 @@ def update_table_player_stats(stats):
             'pp_points': stat['ppPoints'],
             'sh_points': stat['shPoints'],
             'shots_on_goal': stat['shots'],
-            'games_played': stat['gamesPlayed']
+            'games_played': stat['gamesPlayed'],
+            'stats_last_updated': str(datetime.now())
         }
         
         response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
@@ -113,7 +116,8 @@ def update_table_goalie_stats(stats):
             'games_played': stat['gamesPlayed'],
             'goalie_shutouts': stat['shutouts'],
             'goalie_saves': stat['saves'],
-            'goalie_goals_against': stat['goalsAgainst']
+            'goalie_goals_against': stat['goalsAgainst'],
+            'stats_last_updated': str(datetime.now())
         }
         
         response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
