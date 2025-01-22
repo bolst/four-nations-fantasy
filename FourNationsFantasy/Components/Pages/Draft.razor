@@ -43,6 +43,16 @@
                     <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")>🇸🇪</MudChip>
                     <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")>🇫🇮</MudChip>
                 </MudChipSet>
+                
+                <MudStack Class="my-4" Row="true" AlignItems="AlignItems.Center">
+                    <MudText>Sort by</MudText>
+                    <MudChipSet T="string" @bind-SelectedValue="_selectedSortKey" SelectionMode="SelectionMode.SingleSelection">
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("A")>A</MudChip>
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Pts")>P</MudChip>
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Fan. Pts")>Fan. Pts</MudChip>
+                    </MudChipSet>
+                </MudStack>
 
                 @foreach (var player in filteredPlayers.Where(x => allAvailablePlayers.Contains(x)))
                 {
@@ -171,6 +181,18 @@
         }
     }
     private string selectedPositionFilter = "All";
+
+    private string _selectedSortKey
+    {
+        get => selectedSortKey;
+        set
+        {
+            selectedSortKey = value;
+            ApplyFilters();
+        }
+    }
+
+    private string selectedSortKey = "Fan. Pts";
     
     private string searchString;
     private string _searchString
@@ -193,7 +215,7 @@
         }
         (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
         allPlayers = await FNFData.GetAllPlayersAsync();
-        filteredPlayers = allPlayers;
+        filteredPlayers = allPlayers.OrderBy(x => ScoreCalculator.CalculatePlayerSeasonScore(x)).Reverse();
         
         teams = await FNFData.GetAllUsersAsync();
 
@@ -262,6 +284,24 @@
         }
         
         filteredPlayers = filteredPlayers.Where(quickFilter);
+
+        filteredPlayers = filteredPlayers.OrderBy(x =>
+            {
+                
+                switch (_selectedSortKey)
+                {
+                    case "G":
+                        return x.Goals;
+                    case "A":
+                        return x.Assists;
+                    case "Pts":
+                        return x.Goals + x.Assists;
+                    case "Fan. Pts":
+                    default:
+                        return ScoreCalculator.CalculatePlayerSeasonScore(x);
+                }
+        })
+        .Reverse();
     }
 
     private string PlayerCardClass(string position)
