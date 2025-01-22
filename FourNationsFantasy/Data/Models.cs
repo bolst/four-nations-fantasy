@@ -34,7 +34,6 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public int? Points => Goals + Assists;
     #endregion
 
-
     public int NhlIdInt => int.Parse(NhlId);
 
     public string Flag => this.Nationality switch

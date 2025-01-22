@@ -63,6 +63,8 @@ public interface IFNFData
     Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync();
     Task<(int, int)> GetPlayerGameGuessAsync(int gameId, int userId);
     Task AddPlayerGameGuess(int gameId, int userId, int homeScore, int awayScore);
+    Task SimulateDraft();
+    Task ResetRosters();
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -323,6 +325,7 @@ public class FNFData : QueryDapperBase, IFNFData
                           AND user_id = @UserId";
         return await QueryDbSingleAsync<(int, int)>(sql, new { GameId = gameId, UserId = userId });
     }
+    
     public async Task AddPlayerGameGuess(int gameId, int userId, int homeScore, int awayScore)
     {
         string sql = @"INSERT INTO game_guesses (user_id, nhl_game_id, home_score_guess, away_score_guess)
@@ -332,5 +335,62 @@ public class FNFData : QueryDapperBase, IFNFData
         await ExecuteSqlAsync(sql, new { GameId = gameId, UserId = userId, HomeScore = homeScore, AwayScore = awayScore });
     }
 
+    public async Task SimulateDraft()
+    {
+        await ResetRosters();
+        
+        // get # of players playing in tournament
+        var allPlayers = (await GetAllPlayersAsync()).ToList();
+        int numPlayers = allPlayers.Count();
+        
+        var allUsers = (await GetAllUsersAsync()).ToList();
+        int numUsers = allUsers.Count();
+        
+        // generate random list from 1 to numPlayers for the draft number, and partition the user ids uniformly random
+        // each entry will also have the drafted player's nhl id
+        // list will have entries in the form (nhl id, user id, draft number)
+        List<(string, int, int)> usersAndDraftNumbers = new List<(string, int, int)>();
+        
+        // shuffle players and add each to list
+        Random rng = new Random();
+        int draftNumber = 1;
+        foreach (string nhlId in allPlayers.Select(x => x.NhlId).OrderBy(_ => rng.Next()))
+        {
+            // if a round is entered where not everyone gets a selection stop populating
+            // e.g., if 92 players are available and 6 users drafting, stop after pick 90
+            if (draftNumber > (numPlayers / numUsers) * numUsers)
+            {
+                break;
+            }
+            
+            usersAndDraftNumbers.Add( (nhlId, allUsers[draftNumber % numUsers].Id, draftNumber++) );
+        }
+
+        // supposedly this is the only way to do a bulk update w/ Dapper
+        // consider Dapper.Contrib to simplify
+        foreach (var entry in usersAndDraftNumbers)
+        {
+            string sql = @"UPDATE players
+                               SET user_id = @UserId,
+                                   draft_number = @DraftNumber
+                               WHERE
+                                   nhl_id = @NhlId";
+            await ExecuteSqlAsync(sql, new
+            {
+                NhlId = entry.Item1,
+                UserId = entry.Item2,
+                DraftNumber = entry.Item3,
+            });
+        }
+    }
+
+    public async Task ResetRosters()
+    {
+        string sql = @"UPDATE players
+                        SET
+                          user_id = null,
+                          draft_number = null";
+        await ExecuteSqlAsync(sql);
+    }
 }
 

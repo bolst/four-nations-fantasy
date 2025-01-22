@@ -8,7 +8,7 @@
 
 <PageTitle>Draft</PageTitle>
 
-@if (currentUserPick is not null && currentPick != 0)
+@if (currentUserPick is not null && currentPick != 0 && currentPick <= 90)
 {
     <MudStack Class="mb-4" Row="true" Justify="Justify.Center">
         <MudStack AlignItems="AlignItems.Center">
@@ -21,7 +21,7 @@
 <MudPaper Class="my-2" Elevation="3">
     @if (filteredPlayers is not null)
     {
-        <MudTabs PanelClass="pa-4" Centered>
+        <MudTabs PanelClass="pa-4" ActivePanelIndex=@(currentPick <= 90 ? 0 : 1) Centered>
             <MudTabPanel Text="Available Players">
                 
                 <br />
@@ -43,6 +43,16 @@
                     <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")>🇸🇪</MudChip>
                     <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")>🇫🇮</MudChip>
                 </MudChipSet>
+                
+                <MudStack Class="my-4" Row="true" AlignItems="AlignItems.Center">
+                    <MudText>Sort by</MudText>
+                    <MudChipSet T="string" @bind-SelectedValue="_selectedSortKey" SelectionMode="SelectionMode.SingleSelection">
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("A")>A</MudChip>
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Pts")>P</MudChip>
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Fan. Pts")>Fan. Pts</MudChip>
+                    </MudChipSet>
+                </MudStack>
 
                 @foreach (var player in filteredPlayers.Where(x => allAvailablePlayers.Contains(x)))
                 {
@@ -75,20 +85,18 @@
                 
                 <br />
                 
-                <MudGrid Class="px-2">
+                <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
                     @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
                     {
-                        <MudItem xs="6" Class="pa-1">
-                            <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1") Height="90px" @onclick=@(() => RowClicked(player))>
-                                <div class="d-flex justify-space-between align-center">
-                                    <MudText Typo="Typo.caption">@player.Position - @teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName</MudText>
-                                    <MudText Typo="Typo.caption">@player.DraftNumber</MudText>
-                                </div>
-                                <MudText Typo="Typo.body1"><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
-                            </MudPaper>
-                        </MudItem>
+                        <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1 my-1") Width="47%" Height="90px" @onclick=@(() => RowClicked(player))>
+                            <div class="d-flex justify-space-between align-start" style="height: 40px">
+                                <MudText Typo="Typo.caption">@player.Position - @teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName</MudText>
+                                <MudText Typo="Typo.caption">@player.DraftNumber</MudText>
+                            </div>
+                            <MudText Typo="Typo.body1"><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
+                        </MudPaper>
                     }
-                </MudGrid>
+                </MudStack>
             </MudTabPanel>
         </MudTabs>
     }
@@ -171,6 +179,18 @@
         }
     }
     private string selectedPositionFilter = "All";
+
+    private string _selectedSortKey
+    {
+        get => selectedSortKey;
+        set
+        {
+            selectedSortKey = value;
+            ApplyFilters();
+        }
+    }
+
+    private string selectedSortKey = "Fan. Pts";
     
     private string searchString;
     private string _searchString
@@ -193,7 +213,7 @@
         }
         (currentPick, currentUserPick) = await FNFData.GetCurrentDraftPickTeamAsync();
         allPlayers = await FNFData.GetAllPlayersAsync();
-        filteredPlayers = allPlayers;
+        filteredPlayers = allPlayers.OrderBy(x => ScoreCalculator.CalculatePlayerSeasonScore(x)).Reverse();
         
         teams = await FNFData.GetAllUsersAsync();
 
@@ -262,6 +282,24 @@
         }
         
         filteredPlayers = filteredPlayers.Where(quickFilter);
+
+        filteredPlayers = filteredPlayers.OrderBy(x =>
+            {
+                
+                switch (_selectedSortKey)
+                {
+                    case "G":
+                        return x.Goals;
+                    case "A":
+                        return x.Assists;
+                    case "Pts":
+                        return x.Goals + x.Assists;
+                    case "Fan. Pts":
+                    default:
+                        return ScoreCalculator.CalculatePlayerSeasonScore(x);
+                }
+        })
+        .Reverse();
     }
 
     private string PlayerCardClass(string position)
