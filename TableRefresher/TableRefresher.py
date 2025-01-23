@@ -1,9 +1,7 @@
 import os
 from supabase import create_client, Client
 import requests
-import time
 from datetime import datetime
-# import schedule
 
 # create supabase client
 url: str = os.environ.get('SupabaseUrl__FNF')
@@ -124,26 +122,20 @@ def update_table_goalie_stats(stats):
         
         
 if __name__ == '__main__':
-    
-    while True:
-        
-        realtime_stats = fetch_realtime_stats_from_nhl(player_ids)
-        print(f'{len(realtime_stats)} realtime stats queried from NHL')
-        update_table_player_realtime_stats(realtime_stats)
-        print('------------------\n')
+    realtime_stats = fetch_realtime_stats_from_nhl(player_ids)
+    print(f'{len(realtime_stats)} realtime stats queried from NHL')
+    update_table_player_realtime_stats(realtime_stats)
+    print('------------------\n')
 
 
-        player_stats = fetch_player_stats_from_nhl(player_ids)
-        print(f'{len(player_stats)} players queried from NHL')
-        update_table_player_stats(player_stats)
-        print('------------------\n')
+    player_stats = fetch_player_stats_from_nhl(player_ids)
+    print(f'{len(player_stats)} players queried from NHL')
+    update_table_player_stats(player_stats)
+    print('------------------\n')
 
 
-        goalie_stats = fetch_goalie_stats_from_nhl(player_ids)
-        print(f'{len(goalie_stats)} goalies queried from NHL')
-        update_table_goalie_stats(goalie_stats)
-        print('------------------\n')
-        
-        # sleep for 10 min
-        print('\nsleeping...\n')
-        time.sleep(60 * 10)
+    goalie_stats = fetch_goalie_stats_from_nhl(player_ids)
+    print(f'{len(goalie_stats)} goalies queried from NHL')
+    update_table_goalie_stats(goalie_stats)
+    print('------------------\n')
+    print('Done')
