@@ -3,44 +3,47 @@
 
     
 <MudOverlay Visible="@Visible" VisibleChanged="OnVisibleChanged" DarkBackground LockScroll>
-    <MudPaper Class="py-4" Style="height: 70vh; width: 95vw;">
+    <MudPaper Class="pb-4" Style="height: 70vh; width: 95vw;">
         @if (PlayerInfo is not null)
         {
-            <div style="width: 100%" class="d-flex justify-end">
-                <MudIconButton OnClick=@( async () => await OnVisibleChanged(false) ) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small" />
-            </div>
-            <MudSwipeArea OnSwipeEnd="@((e) => OnSwipe(e))">
-                <MudStack Class="px-4" Row="true" AlignItems="AlignItems.Center">
-                    <MudImage Src="@PlayerInfo.Headshot" Width="150"/>
-                    <MudStack Style="width: 100%">
-                        <MudText Typo="Typo.h6">@PlayerInfo.FirstName @PlayerInfo.LastName</MudText>
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
+            <div style="@backgroundCss(PlayerInfo)">
+                <div style="width: 100%" class="d-flex justify-end">
+                    <MudIconButton OnClick=@( async () => await OnVisibleChanged(false) ) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small" />
+                </div>
+                <MudSwipeArea OnSwipeEnd="@((e) => OnSwipe(e))">
+                    <MudStack Class="px-4" Row="true" AlignItems="AlignItems.Center">
+                        <MudImage Src="@PlayerInfo.Headshot" Width="150"/>
+                        <MudStack Style="width: 100%">
+                            <MudText Typo="Typo.h6">@PlayerInfo.FirstName @PlayerInfo.LastName</MudText>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
 
-                            <MudStack AlignItems="AlignItems.Center">
-                                <MudText Typo="Typo.caption">GP</MudText>
-                                <MudText Typo="Typo.h6"><b>@PlayerInfo.GamesPlayed</b></MudText>
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.caption">GP</MudText>
+                                    <MudText Typo="Typo.h6"><b>@PlayerInfo.GamesPlayed</b></MudText>
+                                </MudStack>
+
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.caption">SV%</MudText>
+                                    <MudText Typo="Typo.h6"><b>@PlayerInfo.GoalieSvPctg.ToString("F3")</b></MudText>
+                                </MudStack>
+
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.caption">GAA</MudText>
+                                    <MudText Typo="Typo.h6"><b>@PlayerInfo.GoalieGAA.ToString("F2")</b></MudText>
+                                </MudStack>
+
+                                <MudStack AlignItems="AlignItems.Center">
+                                    <MudText Typo="Typo.caption">SO</MudText>
+                                    <MudText Typo="Typo.h6"><b>@PlayerInfo.GoalieShutouts</b></MudText>
+                                </MudStack>
+
                             </MudStack>
-
-                            <MudStack AlignItems="AlignItems.Center">
-                                <MudText Typo="Typo.caption">SV%</MudText>
-                                <MudText Typo="Typo.h6"><b>@PlayerInfo.GoalieSvPctg.ToString("F3")</b></MudText>
-                            </MudStack>
-
-                            <MudStack AlignItems="AlignItems.Center">
-                                <MudText Typo="Typo.caption">GAA</MudText>
-                                <MudText Typo="Typo.h6"><b>@PlayerInfo.GoalieGAA.ToString("F2")</b></MudText>
-                            </MudStack>
-
-                            <MudStack AlignItems="AlignItems.Center">
-                                <MudText Typo="Typo.caption">SO</MudText>
-                                <MudText Typo="Typo.h6"><b>@PlayerInfo.GoalieShutouts</b></MudText>
-                            </MudStack>
-
+                            
                         </MudStack>
-                        
                     </MudStack>
-                </MudStack>
-            </MudSwipeArea>
+                </MudSwipeArea>
+            </div>
+            
         <MudPaper Class="my-n2 relative mud-theme-dark">
             <MudTabs Centered>
                 <MudTabPanel Text="4 Nations">
@@ -73,6 +76,8 @@
     public Data.FNFPlayer? PlayerInfo { get; set; }
 
     private Nhl.Api.Models.Game.GoalieSeasonGameLog? playerGameLog;
+    
+    private string backgroundCss(Data.FNFPlayer player) => $"background: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url({player.HeroImage}); background-size: 100% auto;";
 
     private async Task OnVisibleChanged(bool visible)
     {

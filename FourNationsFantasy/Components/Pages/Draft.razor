@@ -73,9 +73,19 @@
                         
                         <MudSpacer />
 
-                        <MudText>
-                            <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
-                        </MudText>
+                        <MudStack Spacing="0" AlignItems="AlignItems.End">
+                            <MudText>
+                                <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
+                            </MudText>
+                            @if (player.Position == "G")
+                            {
+                                <MudText Typo="Typo.caption">@($"{player.GoalieWins}W {player.GoalieShutouts}SO")</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption">@($"{player.Goals}G {player.Assists}A")</MudText>
+                            }
+                        </MudStack>
                     </MudStack>
 
                     <MudDivider/>
