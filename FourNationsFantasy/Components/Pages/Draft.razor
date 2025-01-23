@@ -37,11 +37,11 @@
                 </MudChipSet>
 
                 <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
-                    <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("All")>🌍</MudChip>
-                    <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")>🇨🇦</MudChip>
-                    <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")>🇺🇸</MudChip>
-                    <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")>🇸🇪</MudChip>
-                    <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")>🇫🇮</MudChip>
+                    <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("All")><MudImage Height="18" Width="15" Src="https://upload.wikimedia.org/wikipedia/sco/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png" /></MudChip>
+                    <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")><MudImage Height="18" Width="18" Src="CAN-logo.svg" /></MudChip>
+                    <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")><MudImage Height="18" Width="18" Src="USA-logo.svg" /></MudChip>
+                    <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")><MudImage Height="18" Width="18" Src="SWE-logo.svg" /></MudChip>
+                    <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")><MudImage Height="18" Width="18" Src="FIN-logo.svg" /></MudChip>
                 </MudChipSet>
                 
                 <MudStack Class="my-4" Row="true" AlignItems="AlignItems.Center">
@@ -73,9 +73,19 @@
                         
                         <MudSpacer />
 
-                        <MudText>
-                            <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
-                        </MudText>
+                        <MudStack Spacing="0" AlignItems="AlignItems.End">
+                            <MudText>
+                                <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
+                            </MudText>
+                            @if (player.Position == "G")
+                            {
+                                <MudText Typo="Typo.caption">@($"{player.GoalieWins}W {player.GoalieShutouts}SO")</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.caption">@($"{player.Goals}G {player.Assists}A")</MudText>
+                            }
+                        </MudStack>
                     </MudStack>
 
                     <MudDivider/>

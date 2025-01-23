@@ -8,12 +8,16 @@
             <MudItem Class="d-flex align-center justify-center" xs="7">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
                     <MudStack AlignItems="AlignItems.Center">
-                        <MudText>@Game.AwayTeam.Abbrev</MudText>
+                        <MudAvatar>
+                            <MudImage Src=@($"{Game.AwayTeam.Abbrev}-logo.svg")></MudImage>
+                        </MudAvatar>
                         <MudText Color="Color.Surface">@Game.AwayTeam.Score</MudText>
                     </MudStack>
                     <MudText Color="Color.Surface" Class="mx-2">vs</MudText>
                     <MudStack AlignItems="AlignItems.Center">
-                        <MudText>@Game.HomeTeam.Abbrev</MudText>
+                        <MudAvatar>
+                            <MudImage Src=@($"{Game.HomeTeam.Abbrev}-logo.svg")></MudImage>
+                        </MudAvatar>
                         <MudText Color="Color.Surface">@Game.HomeTeam.Score</MudText>
                     </MudStack>
                 </MudStack>
