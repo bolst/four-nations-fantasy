@@ -7,55 +7,53 @@
 <PageTitle>Players</PageTitle>
 
 <div class="d-flex flex-column align-center ma-4">
-    <div class="d-flex flex-row align-center ma-4">
-        <MudButton Color="@(currentNationality == null ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByNationality(null))" 
-                   Class="flag-circle">
-            <MudIcon Icon="@Icons.Material.Filled.Public" Size="Size.Large" />
-        </MudButton>
-        <MudButton Color="@(currentNationality == "CAN" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByNationality("CAN"))" 
-                   Class="flag-circle">
-            <span style="font-size: 32px; line-height: 1;">🇨🇦</span>
-        </MudButton>
-        <MudButton Color="@(currentNationality == "USA" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByNationality("USA"))" 
-                   Class="flag-circle">
-            <span style="font-size: 32px; line-height: 1;">🇺🇸</span>
-        </MudButton>
-        <MudButton Color="@(currentNationality == "SWE" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByNationality("SWE"))" 
-                   Class="flag-circle">
-            <span style="font-size: 32px; line-height: 1;">🇸🇪</span>
-        </MudButton>
-        <MudButton Color="@(currentNationality == "FIN" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByNationality("FIN"))" 
-                   Class="flag-circle">
-            <span style="font-size: 32px; line-height: 1;">🇫🇮</span>
-        </MudButton>
-    </div>
-    <div class="d-flex justify-center align-center">
-        <MudButton Color="@(currentPosition == null ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByPosition(null))" 
-                   Class="position-circle">
-            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" />
-        </MudButton>
-        <MudButton Color="@(currentPosition == "F" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByPosition("F"))" 
-                   Class="position-circle">
-            <MudText Typo="Typo.h5"><b>F</b></MudText>
-        </MudButton>
-        <MudButton Color="@(currentPosition == "D" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByPosition("D"))" 
-                   Class="position-circle">
-            <MudText Typo="Typo.h5"><b>D</b></MudText>
-        </MudButton>
-        <MudButton Color="@(currentPosition == "G" ? Color.Primary : Color.Default)"
-                   OnClick="@(() => FilterByPosition("G"))" 
-                   Class="position-circle">
-            <MudText Typo="Typo.h5"><b>G</b></MudText>
-        </MudButton>
-    </div>
+    <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_currentNationality" SelectionMode="SelectionMode.SingleSelection">
+        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@(string.Empty) Text="ALL">
+            <AvatarContent>
+                <MudAvatar>
+                    <MudImage Class="my-4" Height="30" Width="25" Src="https://upload.wikimedia.org/wikipedia/sco/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png" />
+                </MudAvatar>
+            </AvatarContent>
+        </MudChip>
+        <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")>
+            <AvatarContent>
+                <MudAvatar>
+                    <MudImage Class="my-4" Height="30" Width="30" Src="CAN-logo.svg" />
+                </MudAvatar>
+            </AvatarContent>
+        </MudChip>
+        <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")>
+            <AvatarContent>
+                <MudAvatar>
+                    <MudImage Class="my-4" Height="30" Width="30" Src="USA-logo.svg" />
+                </MudAvatar>
+            </AvatarContent>
+        </MudChip>
+        <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")>
+            <AvatarContent>
+                <MudAvatar>
+                    <MudImage Class="my-4" Height="30" Width="30" Src="SWE-logo.svg" />
+                </MudAvatar>
+            </AvatarContent>
+        </MudChip>
+        <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")>
+            <AvatarContent>
+                <MudAvatar>
+                    <MudImage Class="my-4" Height="30" Width="30" Src="FIN-logo.svg" />
+                </MudAvatar>
+            </AvatarContent>
+        </MudChip>
+    </MudChipSet>
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudFab Color="@(currentPosition == null ? Color.Primary : Color.Default)"
+                OnClick="@(() => FilterByPosition(null))" Label="All" />
+        <MudFab Color="@(currentPosition == "F" ? Color.Primary : Color.Default)"
+                OnClick="@(() => FilterByPosition("F"))" Label="F" />
+        <MudFab Color="@(currentPosition == "D" ? Color.Primary : Color.Default)"
+                OnClick="@(() => FilterByPosition("D"))" Label="D" />
+        <MudFab Color="@(currentPosition == "G" ? Color.Primary : Color.Default)"
+                OnClick="@(() => FilterByPosition("G"))" Label="G" />
+    </MudStack>
 </div>
 
 @if (filteredPlayers is not null)
@@ -77,23 +75,20 @@ else
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 
-<style>
-    .flag-circle, .position-circle {
-        border-radius: 50% !important;
-        min-width: 64px !important;
-        width: 64px !important;
-        height: 64px !important;
-        padding: 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-</style>
-
 @code {
     private IEnumerable<Data.FNFPlayer> allPlayers;
     private IEnumerable<Data.FNFPlayer> filteredPlayers;
-    private string currentNationality;
+
+    private string _currentNationality
+    {
+        get => currentNationality;
+        set
+        {
+            currentNationality = value;
+            ApplyFilters();
+        }
+    }
+    private string currentNationality = string.Empty;
     private string currentPosition;
 
     protected override async Task OnInitializedAsync()
