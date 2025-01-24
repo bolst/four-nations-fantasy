@@ -233,6 +233,20 @@ public class FNFData : QueryDapperBase, IFNFData
         return gameLogs;
     }
 
+
+    /*
+        1. Set a constant for # of forwards/defense/goalies/flex allowed per team (ex. MAX_FORWARDS = 8)
+            a. 15 players total = 8F, 4D, 2G, 1UTIL 
+
+        2. When user selects a player in the draft (ex. forward):
+            a. Check the users roster & count # of forwards
+                i. If # forwards >= MAX_FORWARDS, check #UTIL on roster
+                       If #UTIL >= 1, throw error
+                ii. else, add forward to roster
+
+        obv do this for all positions
+    */
+    
     public async Task DraftPlayerAsync(FNFPlayer player, User user)
     {
         string draftNumberSql = @"SELECT
