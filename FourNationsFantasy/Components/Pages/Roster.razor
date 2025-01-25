@@ -16,27 +16,33 @@
 
 @if (userRoster is not null)
 {
-    <MudText>Forwards</MudText>
-    @foreach (var player in userRoster.Where(p => p.Position == "F"))
-    {
-        <PlayerPointCard Player="@player" />
-    }    
+    <div class="mx-sm-20">
+        <MudText>Forwards</MudText>
+        @foreach (var player in userRoster.Where(p => p.Position == "F"))
+        {
+            <PlayerPointCard Player="@player" />
+        }    
+    </div>
     
     <br />
     
-    <MudText>Defensemen</MudText>
-    @foreach (var player in userRoster.Where(p => p.Position == "D"))
-    {
-        <PlayerPointCard Player="@player" />
-    }    
+    <div class="mx-sm-20">
+        <MudText>Defensemen</MudText>
+        @foreach (var player in userRoster.Where(p => p.Position == "D"))
+        {
+            <PlayerPointCard Player="@player" />
+        }    
+    </div>
     
     <br />
 
-    <MudText>Goalies</MudText>
-    @foreach (var player in userRoster.Where(p => p.Position == "G"))
-    {
-        <GoaliePointCard Player="@player" />
-    }
+    <div class="mx-sm-20">
+        <MudText>Goalies</MudText>
+        @foreach (var player in userRoster.Where(p => p.Position == "G"))
+        {
+            <GoaliePointCard Player="@player" />
+        }
+    </div>
 }
 
 @code {
