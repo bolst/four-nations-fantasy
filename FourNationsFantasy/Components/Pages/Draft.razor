@@ -22,8 +22,8 @@
     <MudPaper Class="my-2 flex-grow-1" Style="max-width: 600px" Elevation="3">
         @if (filteredPlayers is not null)
         {
-            <MudTabs PanelClass="pa-4" ActivePanelIndex=@(currentPick <= 90 ? 0 : 1) Centered>
-                <MudTabPanel Text="Available Players">
+            <MudTabs PanelClass="pa-4" @bind-ActivePanelIndex="@activeTabIndex" MinimumTabWidth="50px" Centered>
+                <MudTabPanel Text="Available">
                     
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
@@ -104,12 +104,23 @@
                         <MudDivider/>
                     }
                 </MudTabPanel>
-                <MudTabPanel Text="Draft Board">
+                <MudTabPanel Text="Board">
                     
                     <br />
                     
                     <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
                         @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
+                        {
+                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
+                        }
+                    </MudStack>
+                </MudTabPanel>
+                <MudTabPanel Text="My Picks">
+
+                    <br />
+
+                    <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
+                        @foreach (var player in allPlayers.Where(x => x.UserId == CustomAuthenticationStateProvider.CurrentUser.Id))
                         {
                             <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
                         }
@@ -133,6 +144,7 @@
     private IEnumerable<Data.FNFPlayer>? filteredPlayers;
     private IEnumerable<Data.User> teams;
 
+    private int activeTabIndex = 0;
     private Data.User? currentUserPick;
     private int currentPick = 0;
 
@@ -240,6 +252,8 @@
         filteredPlayers = allPlayers.OrderBy(x => ScoreCalculator.CalculatePlayerSeasonScore(x)).Reverse();
         
         teams = await FNFData.GetAllUsersAsync();
+
+        activeTabIndex = currentPick <= 90 ? 0 : 1;
 
         await InitializeHubConnection();
     }
