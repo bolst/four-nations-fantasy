@@ -1,6 +1,4 @@
 using Dapper;
-using Nhl.Api.Enumerations.Game;
-using Nhl.Api.Models.Player;
 using Npgsql;
 
 namespace FourNationsFantasy.Data;
