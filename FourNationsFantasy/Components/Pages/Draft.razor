@@ -111,13 +111,7 @@
                     <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
                         @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
                         {
-                            <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1 my-1") Width="47%" Height="90px" @onclick=@(() => RowClicked(player))>
-                                <div class="d-flex justify-space-between align-start" style="height: 40px">
-                                    <MudText Typo="Typo.caption">@player.Position - @teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName</MudText>
-                                    <MudText Typo="Typo.caption">@player.DraftNumber</MudText>
-                                </div>
-                                <MudText Typo="Typo.body1"><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
-                            </MudPaper>
+                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
                         }
                     </MudStack>
                 </MudTabPanel>
@@ -339,17 +333,6 @@
                 }
         })
         .Reverse();
-    }
-
-    private string PlayerCardClass(string position)
-    {
-        return position switch
-        {
-            "F" => "mud-theme-primary",
-            "D" => "mud-theme-secondary",
-            "G" => "mud-theme-tertiary",
-            _ => "mud-theme-info"
-        };
     }
 
     private async Task InitializeHubConnection()
