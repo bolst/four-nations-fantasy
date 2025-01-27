@@ -1,6 +1,4 @@
 using Dapper;
-using Nhl.Api.Enumerations.Game;
-using Nhl.Api.Models.Player;
 using Npgsql;
 
 namespace FourNationsFantasy.Data;
@@ -55,10 +53,8 @@ public interface IFNFData
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
     Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId);
     Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId);
-    Task DraftPlayerAsync(FNFPlayer player, User user);
+    Task<string> DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
-    Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId);
-    Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId);
     Task UpdateTeamNameAsync(Data.User user, string newName);
     Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync();
     Task<(int, int)> GetPlayerGameGuessAsync(int gameId, int userId);
@@ -71,6 +67,11 @@ public class FNFData : QueryDapperBase, IFNFData
 {
     private readonly DateOnly FirstDate = new DateOnly(2025, 02, 12);
     private readonly DateOnly LastDate = new DateOnly(2025, 02, 17);
+
+    private const int MAX_FORWARDS = 8;
+    private const int MAX_DEFENSE = 4;
+    private const int MAX_GOALIES = 2;
+    private const int MAX_UTIL = 1;
     
     private readonly Nhl.Api.INhlApi _nhlApi;
     public FNFData(string connectionString, ICacheService cacheService, Nhl.Api.INhlApi nhlApi) : base(connectionString, cacheService)
@@ -233,7 +234,21 @@ public class FNFData : QueryDapperBase, IFNFData
         return gameLogs;
     }
 
-    public async Task DraftPlayerAsync(FNFPlayer player, User user)
+
+    /*
+        1. Set a constant for # of forwards/defense/goalies/flex allowed per team (ex. MAX_FORWARDS = 8)
+            a. 15 players total = 8F, 4D, 2G, 1UTIL 
+
+        2. When user selects a player in the draft (ex. forward):
+            a. Check the users roster & count # of forwards
+                i. If # forwards >= MAX_FORWARDS, check #UTIL on roster
+                       If #UTIL >= 1, throw error
+                ii. else, add forward to roster
+
+        obv do this for all positions
+    */
+    
+    public async Task<string> DraftPlayerAsync(FNFPlayer player, User user)
     {
         string draftNumberSql = @"SELECT
                                       COALESCE(MAX(draft_number), 0)
@@ -242,6 +257,65 @@ public class FNFData : QueryDapperBase, IFNFData
         int currentDraftNumber = await QueryDbSingleAsync<Int16>(draftNumberSql);
         int newDraftNumber = currentDraftNumber + 1;
         
+        string positionsDraftedSql = @$"WITH
+                                          num_forwards AS (
+                                            SELECT
+                                              COUNT(*) AS nf
+                                            FROM
+                                              players
+                                            WHERE
+                                              user_id = @UserId
+                                              AND position = 'F'
+                                          ),
+                                          num_defense AS (
+                                            SELECT
+                                              COUNT(*) AS nd
+                                            FROM
+                                              players
+                                            WHERE
+                                              user_id = @UserId
+                                              AND position = 'D'
+                                          ),
+                                          num_goalies AS (
+                                            SELECT
+                                              COUNT(*) AS ng
+                                            FROM
+                                              players
+                                            WHERE
+                                              user_id = @UserId
+                                              AND position = 'G'
+                                          )
+                                        SELECT
+                                          nf, nd, ng
+                                        FROM
+                                          num_forwards, num_defense, num_goalies";
+        (int nF, int nD, int nG) = await QueryDbSingleAsync<(int, int, int)>(positionsDraftedSql,  new { UserId = user.Id });
+
+        // if someone already has 2 goalies
+        if (player.Position == "G" && nG >= MAX_GOALIES)
+        {
+            return "You cannot draft more than 2 goalies";
+        }
+        
+        // if someone has exceeded total # of players
+        if (player.Position == "F" || player.Position == "D")
+        {
+            if (nF + nD >= MAX_FORWARDS + MAX_DEFENSE + MAX_UTIL)
+            {
+                return "You must draft 8 forwards, 4 defensemen and 1 utility";
+            }
+
+            if (nF >= MAX_FORWARDS + MAX_UTIL && player.Position == "F")
+            {
+                return "You cannot draft more than 9 forwards";
+            }
+
+            if (nD >= MAX_DEFENSE + MAX_UTIL && player.Position == "D")
+            {
+                return "You cannot draft more than 5 defensemen";
+            }
+        }
+        
         string sql = @"UPDATE players
                             SET
                               user_id = @UserId,
@@ -249,6 +323,8 @@ public class FNFData : QueryDapperBase, IFNFData
                             WHERE
                               nhl_id = @NhlId";
         await ExecuteSqlAsync(sql, new { UserId = user.Id, DraftNumber = newDraftNumber, NhlId = player.NhlId });
+
+        return string.Empty;
     }
 
     public async Task<(int, User?)> GetCurrentDraftPickTeamAsync()
@@ -275,18 +351,6 @@ public class FNFData : QueryDapperBase, IFNFData
         Data.User? currentUser = await QueryDbSingleAsync<User>(sql, new { TeamId = currentTeamId });
         
         return (currentDraftNumber, currentUser);
-    }
-
-    public async Task<Nhl.Api.Models.Player.PlayerProfile?> GetPlayerProfileByIdAsync(int nhlId)
-    {
-        string cacheKey = $"player_profile_{nhlId}";
-        return await CacheService.GetOrAddAsync(cacheKey, async () => await _nhlApi.GetPlayerInformationAsync(nhlId), CacheDuration);
-    }    
-    
-    public async Task<Nhl.Api.Models.Player.GoalieProfile?> GetGoalieProfileByIdAsync(int nhlId)
-    {
-        string cacheKey = $"goalie_profile_{nhlId}";
-        return await CacheService.GetOrAddAsync(cacheKey, async () => await _nhlApi.GetGoalieInformationAsync(nhlId), CacheDuration);
     }
 
     public async Task UpdateTeamNameAsync(Data.User user, string newName)

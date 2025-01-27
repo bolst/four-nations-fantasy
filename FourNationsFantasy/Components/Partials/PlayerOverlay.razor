@@ -3,7 +3,7 @@
 
     
 <MudOverlay Visible="@Visible" VisibleChanged="OnVisibleChanged" DarkBackground LockScroll>
-    <MudPaper Class="pb-4" Style="height: 70vh; width: 95vw;">
+    <MudPaper Class="pb-4" Style="height: 70vh; width: 95vw; max-width: 500px;">
         @if (PlayerInfo is not null)
         {
             <div style="@backgroundCss(PlayerInfo)">

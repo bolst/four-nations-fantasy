@@ -1,0 +1,35 @@
+@inject Data.IFNFData FNFData
+
+@if (Player is not null)
+{
+    <MudPaper Class=@($"{PlayerCardClass(Player.Position)} pa-1 my-1") Width="47%" Height="90px" @onclick=@(async () => await OnClick.InvokeAsync(Player))>
+        <div class="d-flex justify-space-between align-start" style="height: 40px">
+            <MudText Typo="Typo.caption">@Player.Position - @TeamName</MudText>
+            <MudText Typo="Typo.caption">@Player.DraftNumber</MudText>
+        </div>
+        <MudText Typo="Typo.body1"><b>@($"{Player.FirstName} {Player.LastName}")</b></MudText>
+</MudPaper>
+}
+
+@code {
+    
+    [Parameter]
+    public Data.FNFPlayer? Player { get; set; }
+
+    [Parameter] 
+    public string TeamName { get; set; } = string.Empty;
+    
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+    
+    private string PlayerCardClass(string position)
+    {
+        return position switch
+        {
+            "F" => "mud-theme-primary",
+            "D" => "mud-theme-secondary",
+            "G" => "mud-theme-tertiary",
+            _ => "mud-theme-info"
+        };
+    }
+}

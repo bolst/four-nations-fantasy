@@ -58,17 +58,23 @@
 
 @if (filteredPlayers is not null)
 {
-    @foreach(var player in filteredPlayers)
-    {
-        if (player.Position == "G")
+    <MudGrid Spacing="0">
+        @foreach(var player in filteredPlayers)
         {
-            <GoaliePointCard Player="player" />            
+            <MudItem xs="0" sm="2"></MudItem>
+            <MudItem xs="12" sm="8">
+                @if (player.Position == "G")
+                {
+                    <GoaliePointCard Player="player" />            
+                }
+                else
+                {
+                    <PlayerPointCard Player="player" />
+                }
+            </MudItem>
+            <MudItem xs="0" sm="2"></MudItem>
         }
-        else
-        {
-            <PlayerPointCard Player="player" />
-        }
-    }
+    </MudGrid>
 }
 else
 {

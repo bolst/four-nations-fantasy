@@ -18,99 +18,118 @@
     </MudStack>
 }
 
-<MudPaper Class="my-2" Elevation="3">
-    @if (filteredPlayers is not null)
-    {
-        <MudTabs PanelClass="pa-4" ActivePanelIndex=@(currentPick <= 90 ? 0 : 1) Centered>
-            <MudTabPanel Text="Available Players">
-                
-                <br />
-                
-                <MudTextField @bind-Value="_searchString" Placeholder="Search players..." Adornment="Adornment.Start"
-                              Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+<div class="d-flex justify-center flex-grow-1">
+    <MudPaper Class="my-2 flex-grow-1" Style="max-width: 600px" Elevation="3">
+        @if (filteredPlayers is not null)
+        {
+            <MudTabs PanelClass="pa-4" @bind-ActivePanelIndex="@activeTabIndex" MinimumTabWidth="50px" Centered>
+                <MudTabPanel Text="Available">
+                    
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <MudText Typo="Typo.body1" Color="Color.Error">@errorMessage</MudText>
+                    }
 
-                <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedPositionFilter" SelectionMode="SelectionMode.SingleSelection">
-                    <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
-                    <MudChip Text="F" Color="Color.Primary" Variant="Variant.Text" Value=@("F")>F</MudChip>
-                    <MudChip Text="D" Color="Color.Primary" Variant="Variant.Text" Value=@("D")>D</MudChip>
-                    <MudChip Text="G" Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
-                </MudChipSet>
+                    <br/>
 
-                <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
-                    <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("All")><MudImage Height="18" Width="15" Src="https://upload.wikimedia.org/wikipedia/sco/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png" /></MudChip>
-                    <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")><MudImage Height="18" Width="18" Src="CAN-logo.svg" /></MudChip>
-                    <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")><MudImage Height="18" Width="18" Src="USA-logo.svg" /></MudChip>
-                    <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")><MudImage Height="18" Width="18" Src="SWE-logo.svg" /></MudChip>
-                    <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")><MudImage Height="18" Width="18" Src="FIN-logo.svg" /></MudChip>
-                </MudChipSet>
-                
-                <MudStack Class="my-4" Row="true" AlignItems="AlignItems.Center">
-                    <MudText>Sort by</MudText>
-                    <MudChipSet T="string" @bind-SelectedValue="_selectedSortKey" SelectionMode="SelectionMode.SingleSelection">
-                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
-                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("A")>A</MudChip>
-                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Pts")>P</MudChip>
-                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Fan. Pts")>Fan. Pts</MudChip>
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search players..." Adornment="Adornment.Start"
+                                  Immediate="true" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+
+                    <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedPositionFilter" SelectionMode="SelectionMode.SingleSelection">
+                        <MudChip Text="All" Color="Color.Primary" Variant="Variant.Text" Value=@("All")>All</MudChip>
+                        <MudChip Text="F" Color="Color.Primary" Variant="Variant.Text" Value=@("F")>F</MudChip>
+                        <MudChip Text="D" Color="Color.Primary" Variant="Variant.Text" Value=@("D")>D</MudChip>
+                        <MudChip Text="G" Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
                     </MudChipSet>
-                </MudStack>
 
-                @foreach (var player in filteredPlayers.Where(x => allAvailablePlayers.Contains(x)))
-                {
-                    <MudStack Class="my-2" Row="true" AlignItems="AlignItems.Center">
-                        @if (playerToConfirm is not null && playerToConfirm.Equals(player))
-                        {
-                            <MudButton Disabled="!isCurrentPick" OnClick="() => ConfirmDraft(player)" Color="Color.Success" Variant="Variant.Filled">Confirm</MudButton>
-                        }
-                        else
-                        {
-                            <MudButton Disabled="!isCurrentPick" OnClick="() => InitiateDraft(player)" Color="Color.Primary" Variant="Variant.Filled">Draft</MudButton>
-                        }
+                    <MudChipSet Class="my-4" T="string" @bind-SelectedValue="_selectedNationality" SelectionMode="SelectionMode.SingleSelection">
+                        <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("All")><MudImage Height="18" Width="15" Src="https://upload.wikimedia.org/wikipedia/sco/thumb/3/3a/05_NHL_Shield.svg/1200px-05_NHL_Shield.svg.png"/></MudChip>
+                        <MudChip Color="Color.Error" Variant="Variant.Text" Value=@("CAN")><MudImage Height="18" Width="18" Src="CAN-logo.svg"/></MudChip>
+                        <MudChip Color="Color.Info" Variant="Variant.Text" Value=@("USA")><MudImage Height="18" Width="18" Src="USA-logo.svg"/></MudChip>
+                        <MudChip Color="Color.Warning" Variant="Variant.Text" Value=@("SWE")><MudImage Height="18" Width="18" Src="SWE-logo.svg"/></MudChip>
+                        <MudChip Color="Color.Surface" Variant="Variant.Text" Value=@("FIN")><MudImage Height="18" Width="18" Src="FIN-logo.svg"/></MudChip>
+                    </MudChipSet>
 
-                        <MudStack @onclick=@(() => RowClicked(player))>
-                            <MudText><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
-                            <MudText Typo="Typo.body2">@player.FullPosition &nbsp; @player.Flag</MudText>
-                        </MudStack>
-                        
-                        <MudSpacer />
+                    <MudStack Class="my-4" Row="true" AlignItems="AlignItems.Center">
+                        <MudText>Sort by</MudText>
+                        <MudChipSet T="string" @bind-SelectedValue="_selectedSortKey" SelectionMode="SelectionMode.SingleSelection">
+                            <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("G")>G</MudChip>
+                            <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("A")>A</MudChip>
+                            <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Pts")>P</MudChip>
+                            <MudChip Color="Color.Primary" Variant="Variant.Text" Value=@("Fan. Pts")>Fan. Pts</MudChip>
+                        </MudChipSet>
+                    </MudStack>
 
-                        <MudStack Spacing="0" AlignItems="AlignItems.End">
-                            <MudText>
-                                <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
-                            </MudText>
-                            @if (player.Position == "G")
+                    <MudStack Class="my-4" Row="true" Spacing="1">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">@($"{Math.Min(numUserSelectedForwards, 8)}/8F")</MudChip>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Secondary">@($"{Math.Min(numUserSelectedDefense, 4)}/4D")</MudChip>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Tertiary">@($"{numUserSelectedGoalies}/2G")</MudChip>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Surface">@($"{numUserSelectedForwards/9 + numUserSelectedDefense/5}/1U")</MudChip>
+                    </MudStack>
+
+                    @foreach (var player in filteredPlayers.Where(x => allAvailablePlayers.Contains(x)))
+                    {
+                        <MudStack Class="my-2" Row="true" AlignItems="AlignItems.Center">
+                            @if (playerToConfirm is not null && playerToConfirm.Equals(player))
                             {
-                                <MudText Typo="Typo.caption">@($"{player.GoalieWins}W {player.GoalieShutouts}SO")</MudText>
+                                <MudButton Disabled="!isCurrentPick" OnClick="() => ConfirmDraft(player)" Color="Color.Success" Variant="Variant.Filled">Confirm</MudButton>
                             }
                             else
                             {
-                                <MudText Typo="Typo.caption">@($"{player.Goals}G {player.Assists}A")</MudText>
+                                <MudButton Disabled="!isCurrentPick" OnClick="() => InitiateDraft(player)" Color="Color.Primary" Variant="Variant.Filled">Draft</MudButton>
                             }
-                        </MudStack>
-                    </MudStack>
 
-                    <MudDivider/>
-                }
-            </MudTabPanel>
-            <MudTabPanel Text="Draft Board">
-                
-                <br />
-                
-                <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
-                    @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
-                    {
-                        <MudPaper Class=@($"{PlayerCardClass(player.Position)} pa-1 my-1") Width="47%" Height="90px" @onclick=@(() => RowClicked(player))>
-                            <div class="d-flex justify-space-between align-start" style="height: 40px">
-                                <MudText Typo="Typo.caption">@player.Position - @teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName</MudText>
-                                <MudText Typo="Typo.caption">@player.DraftNumber</MudText>
-                            </div>
-                            <MudText Typo="Typo.body1"><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
-                        </MudPaper>
+                            <MudStack @onclick=@(() => RowClicked(player))>
+                                <MudText><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
+                                <MudText Typo="Typo.body2">@player.FullPosition &nbsp; @player.Flag</MudText>
+                            </MudStack>
+
+                            <MudSpacer/>
+
+                            <MudStack Spacing="0" AlignItems="AlignItems.End">
+                                <MudText>
+                                    <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
+                                </MudText>
+                                @if (player.Position == "G")
+                                {
+                                    <MudText Typo="Typo.caption">@($"{player.GoalieWins}W {player.GoalieShutouts}SO")</MudText>
+                                }
+                                else
+                                {
+                                    <MudText Typo="Typo.caption">@($"{player.Goals}G {player.Assists}A")</MudText>
+                                }
+                            </MudStack>
+                        </MudStack>
+
+                        <MudDivider/>
                     }
-                </MudStack>
-            </MudTabPanel>
-        </MudTabs>
-    }
-</MudPaper>
+                </MudTabPanel>
+                <MudTabPanel Text="Board">
+                    
+                    <br />
+                    
+                    <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
+                        @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
+                        {
+                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
+                        }
+                    </MudStack>
+                </MudTabPanel>
+                <MudTabPanel Text="My Picks">
+
+                    <br />
+
+                    <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
+                        @foreach (var player in allPlayers.Where(x => x.UserId == CustomAuthenticationStateProvider.CurrentUser.Id))
+                        {
+                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
+                        }
+                    </MudStack>
+                </MudTabPanel>
+            </MudTabs>
+        }
+    </MudPaper>
+</div>
 
 <PlayerOverlay @bind-Visible="_playerOverlayVisible" PlayerInfo="overlayPlayer" />
 
@@ -119,16 +138,23 @@
 @code {
     private HubConnection? hubConnection;
     private bool isConnected => hubConnection is not null && hubConnection.State == HubConnectionState.Connected;
-    
+
     private IEnumerable<Data.FNFPlayer>? allPlayers;
     private IEnumerable<Data.FNFPlayer>? allAvailablePlayers => allPlayers?.Where(x => x.UserId is null);
     private IEnumerable<Data.FNFPlayer>? filteredPlayers;
     private IEnumerable<Data.User> teams;
 
+    private int activeTabIndex = 0;
     private Data.User? currentUserPick;
     private int currentPick = 0;
 
+    string errorMessage;
+
     private bool isCurrentPick => currentUserPick is not null && currentUserPick.Id == CustomAuthenticationStateProvider.CurrentUser.Id;
+
+    private int numUserSelectedForwards => allPlayers.Where(p => p.Position == "F" && p.UserId == CustomAuthenticationStateProvider.CurrentUser.Id).Count();
+    private int numUserSelectedDefense => allPlayers.Where(p => p.Position == "D" && p.UserId == CustomAuthenticationStateProvider.CurrentUser.Id).Count();
+    private int numUserSelectedGoalies => allPlayers.Where(p => p.Position == "G" && p.UserId == CustomAuthenticationStateProvider.CurrentUser.Id).Count();
     
     private bool _playerOverlayVisible
     {
@@ -227,11 +253,14 @@
         
         teams = await FNFData.GetAllUsersAsync();
 
-        await initializeHubConnection();
+        activeTabIndex = currentPick <= 90 ? 0 : 1;
+
+        await InitializeHubConnection();
     }
 
     private void InitiateDraft(Data.FNFPlayer player)
     {
+        errorMessage = string.Empty;
         playerToConfirm = player;
     }
 
@@ -239,12 +268,20 @@
     {
         if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email) && CustomAuthenticationStateProvider.CurrentUser.Id == currentUserPick.Id)
         {
-            await FNFData.DraftPlayerAsync(player, CustomAuthenticationStateProvider.CurrentUser);
+            string msg = await FNFData.DraftPlayerAsync(player, CustomAuthenticationStateProvider.CurrentUser);
 
+            if (!string.IsNullOrEmpty(msg))
+            {
+                errorMessage = msg;
+                return;
+            }
+            
             if (isConnected)
             {
                 await hubConnection.SendAsync("DraftPlayer", player, CustomAuthenticationStateProvider.CurrentUser);
+                Console.WriteLine($"drafted {player.FirstName} {player.LastName}");
             }
+            
         }
 
         playerToConfirm = null;
@@ -312,18 +349,7 @@
         .Reverse();
     }
 
-    private string PlayerCardClass(string position)
-    {
-        return position switch
-        {
-            "F" => "mud-theme-primary",
-            "D" => "mud-theme-secondary",
-            "G" => "mud-theme-tertiary",
-            _ => "mud-theme-info"
-        };
-    }
-
-    private async Task initializeHubConnection()
+    private async Task InitializeHubConnection()
     {
         string hubUrl = Navigation.BaseUri.TrimEnd('/') + Hubs.DraftHub.HubUrl;
         hubConnection = new HubConnectionBuilder()
@@ -345,7 +371,7 @@
             });
             filteredPlayers = allPlayers;
             
-            InvokeAsync(StateHasChanged);
+            await InvokeAsync(StateHasChanged);
         });
             
         await hubConnection.StartAsync();
