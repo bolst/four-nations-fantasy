@@ -125,8 +125,6 @@ public class FNFData : QueryDapperBase, IFNFData
     
     public async Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync()
     {
-        string cacheKey = "all_players";
-        
         string sql = @"SELECT
                           nhl_id AS NhlId,
                           firstname AS FirstName,
