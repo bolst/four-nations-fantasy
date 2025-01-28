@@ -73,11 +73,11 @@ public class CustomUserService
 
             if (masq is null)
             {
-                user.Email = _protector.Unprotect(await _localStorageService.GetItemAsync<string>("user"));
+                user.email = _protector.Unprotect(await _localStorageService.GetItemAsync<string>("user"));
             }
             else
             {
-                user.Email = _protector.Unprotect(masq);
+                user.email = _protector.Unprotect(masq);
             }
 
             return (user, masq is not null);
@@ -90,7 +90,7 @@ public class CustomUserService
 
     public async Task BeginMasquerade(User user)
     {
-        await _localStorageService.SetItemAsync("masq", _protector.Protect(user.Email));
+        await _localStorageService.SetItemAsync("masq", _protector.Protect(user.email));
     }
 
     public async Task EndMasquerade()

@@ -61,7 +61,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        (homeScoreInput, awayScoreInput) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.Id);
+        (homeScoreInput, awayScoreInput) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.id);
     }
 
     private async Task OnVisibleChanged(bool visible)
@@ -95,7 +95,7 @@
     {
         if (scoreConfirmed)
         {
-            await FNFData.AddPlayerGameGuess(Game.Id, CustomAuthenticationStateProvider.CurrentUser.Id, homeScoreInput, awayScoreInput);
+            await FNFData.AddPlayerGameGuess(Game.Id, CustomAuthenticationStateProvider.CurrentUser.id, homeScoreInput, awayScoreInput);
             await OnVisibleChanged(false);
             await OnGuess.InvokeAsync(false);
         }

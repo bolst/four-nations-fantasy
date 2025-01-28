@@ -2,12 +2,12 @@
 
 @if (Player is not null)
 {
-    <MudPaper Class=@($"{PlayerCardClass(Player.Position)} pa-1 my-1") Width="47%" Height="90px" @onclick=@(async () => await OnClick.InvokeAsync(Player))>
+    <MudPaper Class=@($"{PlayerCardClass(Player.position)} pa-1 my-1") Width="47%" Height="90px" @onclick=@(async () => await OnClick.InvokeAsync(Player))>
         <div class="d-flex justify-space-between align-start" style="height: 40px">
-            <MudText Typo="Typo.caption">@Player.Position - @TeamName</MudText>
-            <MudText Typo="Typo.caption">@Player.DraftNumber</MudText>
+            <MudText Typo="Typo.caption">@Player.position - @TeamName</MudText>
+            <MudText Typo="Typo.caption">@Player.draft_number</MudText>
         </div>
-        <MudText Typo="Typo.body1"><b>@($"{Player.FirstName} {Player.LastName}")</b></MudText>
+        <MudText Typo="Typo.body1"><b>@($"{Player.firstname} {Player.lastname}")</b></MudText>
 </MudPaper>
 }
 

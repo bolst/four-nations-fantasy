@@ -10,7 +10,7 @@
 @if (user is not null)
 {
     <div class="pa-2 mb-8">
-        <MudText Typo="Typo.h4" HtmlTag="i"><b>@user.TeamName</b></MudText>
+        <MudText Typo="Typo.h4" HtmlTag="i"><b>@user.teamname</b></MudText>
     </div>
 }
 
@@ -18,7 +18,7 @@
 {
     <div class="mx-sm-20">
         <MudText>Forwards</MudText>
-        @foreach (var player in userRoster.Where(p => p.Position == "F"))
+        @foreach (var player in userRoster.Where(p => p.position == "F"))
         {
             <PlayerPointCard Player="@player" />
         }    
@@ -28,7 +28,7 @@
     
     <div class="mx-sm-20">
         <MudText>Defensemen</MudText>
-        @foreach (var player in userRoster.Where(p => p.Position == "D"))
+        @foreach (var player in userRoster.Where(p => p.position == "D"))
         {
             <PlayerPointCard Player="@player" />
         }    
@@ -38,7 +38,7 @@
 
     <div class="mx-sm-20">
         <MudText>Goalies</MudText>
-        @foreach (var player in userRoster.Where(p => p.Position == "G"))
+        @foreach (var player in userRoster.Where(p => p.position == "G"))
         {
             <GoaliePointCard Player="@player" />
         }
@@ -55,7 +55,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email))
         {
             Navigation.NavigateTo("/");
         }
@@ -72,7 +72,7 @@
         
         if (user is not null)
         {
-            userRoster = await FNFData.GetRosterAsync(user.Id);
+            userRoster = await FNFData.GetRosterAsync(user.id);
         }
     }
 }

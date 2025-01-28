@@ -4,39 +4,39 @@ namespace FourNationsFantasy.Data;
 
 public class FNFPlayer : IEquatable<FNFPlayer>
 {
-    public string NhlId { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Position { get; set; }
-    public string Nationality { get; set; }
-    public int? DraftNumber { get; set;}
-    public int? UserId { get; set; }
-    public string? Headshot { get; set; }
-    public string? HeroImage { get; set; }
+    public string nhl_id { get; set; }
+    public string firstname { get; set; }
+    public string lastname { get; set; }
+    public string position { get; set; }
+    public string nationality { get; set; }
+    public int? draft_number { get; set;}
+    public int? user_id { get; set; }
+    public string? headshot { get; set; }
+    public string? hero_image { get; set; }
 
     #region Season totals
 
-    public int GamesPlayed { get; set; } = 0;
-    public int Goals { get; set; }
-    public int Assists { get; set; }
-    public int PowerplayPoints { get; set; }
-    public int ShorthandedPoints { get; set; }
-    public int SOG { get; set; }
-    public int Hits { get; set; }
-    public int Blocks { get; set; }
-    public int GoalieWins { get; set; }
-    public double GoalieGAA { get; set; }
-    public double GoalieSvPctg { get; set; }
-    public int GoalieShutouts { get; set; }
-    public int GoalieGoalsAgainst { get; set; }
-    public int GoalieSaves { get; set; }
+    public int games_played { get; set; } = 0;
+    public int goals { get; set; }
+    public int assists { get; set; }
+    public int pp_points { get; set; }
+    public int sh_points { get; set; }
+    public int shots_on_goal { get; set; }
+    public int hits { get; set; }
+    public int blocks { get; set; }
+    public int goalie_wins { get; set; }
+    public double goalie_gaa { get; set; }
+    public double goalie_sv_pctg { get; set; }
+    public int goalie_shutouts { get; set; }
+    public int goalie_goals_against { get; set; }
+    public int goalie_saves { get; set; }
 
-    public int? Points => Goals + Assists;
+    public int? Points => goals + assists;
     #endregion
 
-    public int NhlIdInt => int.Parse(NhlId);
+    public int NhlIdInt => int.Parse(nhl_id);
 
-    public string Flag => this.Nationality switch
+    public string Flag => this.nationality switch
     {
         "CAN" => "\ud83c\udde8\ud83c\udde6",
         "USA" => "\ud83c\uddfa\ud83c\uddf8",
@@ -45,7 +45,7 @@ public class FNFPlayer : IEquatable<FNFPlayer>
         _ => "\ud83c\udf0d",
     };
 
-    public string FullPosition => this.Position switch
+    public string FullPosition => this.position switch
     {
         "F" => "Forward",
         "D" => "Defense",
@@ -63,46 +63,46 @@ public class FNFPlayer : IEquatable<FNFPlayer>
 
     public override int GetHashCode()
     {
-        return int.Parse(NhlId);
+        return NhlIdInt;
     }
 
     public bool Equals(FNFPlayer other)
     {
         if (other is null) return false;
-        return (this.NhlId == other.NhlId);
+        return (this.nhl_id == other.nhl_id);
     }
 }
 
 public class User
 {
-    public int Id { get; set; }
-    public string Email { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? TeamName { get; set; }
-    public string Role { get; set; }
-    public bool IsAdmin => Role.ToLower().Equals("admin");
+    public int id { get; set; }
+    public string email { get; set; }
+    public string? firstname { get; set; }
+    public string? lastname { get; set; }
+    public string? teamname { get; set; }
+    public string role { get; set; }
+    public bool IsAdmin => role.ToLower().Equals("admin");
 
     public ClaimsPrincipal ToClaimsPrincipal()
     {
         return new(new ClaimsIdentity(new Claim[]
         {
-            new (ClaimTypes.Sid, Id.ToString()),
-            new (ClaimTypes.Name, Email),
-            new (nameof(FirstName), FirstName),
-            new (nameof(LastName), LastName),
-            new (nameof(TeamName), TeamName),
-            new(ClaimTypes.Role, Role)
+            new (ClaimTypes.Sid, id.ToString()),
+            new (ClaimTypes.Name, email),
+            new (nameof(firstname), firstname),
+            new (nameof(lastname), lastname),
+            new (nameof(teamname), teamname),
+            new(ClaimTypes.Role, role)
         }, "FNF"));
     }
 
     public static User FromClaimsPrincipal(ClaimsPrincipal principal) => new()
     {
-        Id = int.Parse(principal.FindFirstValue(ClaimTypes.Sid)),
-        Email = principal.FindFirstValue(ClaimTypes.Email),
-        FirstName = principal.FindFirstValue(nameof(FirstName)),
-        LastName = principal.FindFirstValue(nameof(LastName)),
-        TeamName = principal.FindFirstValue(nameof(TeamName)),
-        Role = principal.FindFirstValue(ClaimTypes.Role),
+        id = int.Parse(principal.FindFirstValue(ClaimTypes.Sid)),
+        email = principal.FindFirstValue(ClaimTypes.Email),
+        firstname = principal.FindFirstValue(nameof(firstname)),
+        lastname = principal.FindFirstValue(nameof(lastname)),
+        teamname = principal.FindFirstValue(nameof(teamname)),
+        role = principal.FindFirstValue(ClaimTypes.Role),
     };
 }

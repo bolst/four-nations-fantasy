@@ -59,7 +59,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email))
         {
             sentLink = false;
             isLoading = false;

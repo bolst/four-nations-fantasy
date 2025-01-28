@@ -13,7 +13,7 @@
     <MudStack Class="mb-4" Row="true" Justify="Justify.Center">
         <MudStack AlignItems="AlignItems.Center">
             <MudText Typo="Typo.h6">Pick @currentPick</MudText>
-            <MudText Typo="Typo.h6" Color=@(isCurrentPick ? Color.Primary : Color.Default)>@currentUserPick.TeamName</MudText>
+            <MudText Typo="Typo.h6" Color=@(isCurrentPick ? Color.Primary : Color.Default)>@currentUserPick.teamname</MudText>
         </MudStack>
     </MudStack>
 }
@@ -80,7 +80,7 @@
                             }
 
                             <MudStack @onclick=@(() => RowClicked(player))>
-                                <MudText><b>@($"{player.FirstName} {player.LastName}")</b></MudText>
+                                <MudText><b>@($"{player.firstname} {player.lastname}")</b></MudText>
                                 <MudText Typo="Typo.body2">@player.FullPosition &nbsp; @player.Flag</MudText>
                             </MudStack>
 
@@ -90,13 +90,13 @@
                                 <MudText>
                                     <b>@ScoreCalculator.CalculatePlayerSeasonScore(player).ToString("F2")</b>
                                 </MudText>
-                                @if (player.Position == "G")
+                                @if (player.position == "G")
                                 {
-                                    <MudText Typo="Typo.caption">@($"{player.GoalieWins}W {player.GoalieShutouts}SO")</MudText>
+                                    <MudText Typo="Typo.caption">@($"{player.goalie_wins}W {player.goalie_shutouts}SO")</MudText>
                                 }
                                 else
                                 {
-                                    <MudText Typo="Typo.caption">@($"{player.Goals}G {player.Assists}A")</MudText>
+                                    <MudText Typo="Typo.caption">@($"{player.goals}G {player.assists}A")</MudText>
                                 }
                             </MudStack>
                         </MudStack>
@@ -109,9 +109,9 @@
                     <br />
                     
                     <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
-                        @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.DraftNumber))
+                        @foreach (var player in allPlayers.Where(x => !allAvailablePlayers.Contains(x)).OrderBy(x => x.draft_number))
                         {
-                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
+                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.id == player.user_id).FirstOrDefault().teamname" OnClick=@(() => RowClicked(player)) />
                         }
                     </MudStack>
                 </MudTabPanel>
@@ -120,9 +120,9 @@
                     <br />
 
                     <MudStack Wrap="Wrap.Wrap" Spacing="0" Row="true" Justify="Justify.SpaceEvenly">
-                        @foreach (var player in allPlayers.Where(x => x.UserId == CustomAuthenticationStateProvider.CurrentUser.Id))
+                        @foreach (var player in allPlayers.Where(x => x.user_id == CustomAuthenticationStateProvider.CurrentUser.id))
                         {
-                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.Id == player.UserId).FirstOrDefault().TeamName" OnClick=@(() => RowClicked(player)) />
+                            <DraftBoardPlayer Player="player" TeamName="@teams.Where(x => x.id == player.user_id).FirstOrDefault().teamname" OnClick=@(() => RowClicked(player)) />
                         }
                     </MudStack>
                 </MudTabPanel>
@@ -140,7 +140,7 @@
     private bool isConnected => hubConnection is not null && hubConnection.State == HubConnectionState.Connected;
 
     private IEnumerable<Data.FNFPlayer>? allPlayers;
-    private IEnumerable<Data.FNFPlayer>? allAvailablePlayers => allPlayers?.Where(x => x.UserId is null);
+    private IEnumerable<Data.FNFPlayer>? allAvailablePlayers => allPlayers?.Where(x => x.user_id is null);
     private IEnumerable<Data.FNFPlayer>? filteredPlayers;
     private IEnumerable<Data.User> teams;
 
@@ -150,11 +150,11 @@
 
     string errorMessage;
 
-    private bool isCurrentPick => currentUserPick is not null && currentUserPick.Id == CustomAuthenticationStateProvider.CurrentUser.Id;
+    private bool isCurrentPick => currentUserPick is not null && currentUserPick.id == CustomAuthenticationStateProvider.CurrentUser.id;
 
-    private int numUserSelectedForwards => allPlayers.Where(p => p.Position == "F" && p.UserId == CustomAuthenticationStateProvider.CurrentUser.Id).Count();
-    private int numUserSelectedDefense => allPlayers.Where(p => p.Position == "D" && p.UserId == CustomAuthenticationStateProvider.CurrentUser.Id).Count();
-    private int numUserSelectedGoalies => allPlayers.Where(p => p.Position == "G" && p.UserId == CustomAuthenticationStateProvider.CurrentUser.Id).Count();
+    private int numUserSelectedForwards => allPlayers.Where(p => p.position == "F" && p.user_id == CustomAuthenticationStateProvider.CurrentUser.id).Count();
+    private int numUserSelectedDefense => allPlayers.Where(p => p.position == "D" && p.user_id == CustomAuthenticationStateProvider.CurrentUser.id).Count();
+    private int numUserSelectedGoalies => allPlayers.Where(p => p.position == "G" && p.user_id == CustomAuthenticationStateProvider.CurrentUser.id).Count();
     
     private bool _playerOverlayVisible
     {
@@ -243,7 +243,7 @@
     
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email))
         {
             Navigation.NavigateTo("/");
         }
@@ -266,7 +266,7 @@
 
     private async Task ConfirmDraft(Data.FNFPlayer player)
     {
-        if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email) && CustomAuthenticationStateProvider.CurrentUser.Id == currentUserPick.Id)
+        if (!string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email) && CustomAuthenticationStateProvider.CurrentUser.id == currentUserPick.id)
         {
             string msg = await FNFData.DraftPlayerAsync(player, CustomAuthenticationStateProvider.CurrentUser);
 
@@ -279,7 +279,7 @@
             if (isConnected)
             {
                 await hubConnection.SendAsync("DraftPlayer", player, CustomAuthenticationStateProvider.CurrentUser);
-                Console.WriteLine($"drafted {player.FirstName} {player.LastName}");
+                Console.WriteLine($"drafted {player.firstname} {player.lastname}");
             }
             
         }
@@ -290,7 +290,7 @@
     private async Task RowClicked(Data.FNFPlayer player)
     {
         overlayPlayer = player;
-        if (player.Position == "G")
+        if (player.position == "G")
         {
             goalieOverlayVisible = true;
         }
@@ -305,10 +305,10 @@
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
 
-        if (x.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.firstname.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.lastname.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
         return false;
@@ -320,12 +320,12 @@
         
         if (selectedPositionFilter != "All")
         {
-            filteredPlayers = filteredPlayers.Where(p => p.Position == selectedPositionFilter);
+            filteredPlayers = filteredPlayers.Where(p => p.position == selectedPositionFilter);
         }
         
         if (selectedNationality != "All")
         {
-            filteredPlayers = filteredPlayers.Where(p => p.Nationality == selectedNationality);
+            filteredPlayers = filteredPlayers.Where(p => p.nationality == selectedNationality);
         }
         
         filteredPlayers = filteredPlayers.Where(quickFilter);
@@ -336,11 +336,11 @@
                 switch (_selectedSortKey)
                 {
                     case "G":
-                        return x.Goals;
+                        return x.goals;
                     case "A":
-                        return x.Assists;
+                        return x.assists;
                     case "Pts":
-                        return x.Goals + x.Assists;
+                        return x.goals + x.assists;
                     case "Fan. Pts":
                     default:
                         return ScoreCalculator.CalculatePlayerSeasonScore(x);
@@ -364,8 +364,8 @@
             {
                 if (p.Equals(player))
                 {
-                    p.UserId = user.Id;
-                    p.DraftNumber = currentPick - 1;
+                    p.user_id = user.id;
+                    p.draft_number = currentPick - 1;
                 }
                 return p;
             });

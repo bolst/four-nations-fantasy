@@ -7,18 +7,18 @@
 
 <PageTitle>Settings</PageTitle>
 
-@if (!string.IsNullOrEmpty(currentUser.Email))
+@if (!string.IsNullOrEmpty(currentUser.email))
 {
     <MudStack AlignItems="AlignItems.Center">
-        <MudText Typo="Typo.h6">@currentUser.FirstName @currentUser.LastName</MudText>
-        <MudText Typo="Typo.caption">@currentUser.Email</MudText>
+        <MudText Typo="Typo.h6">@currentUser.firstname @currentUser.lastname</MudText>
+        <MudText Typo="Typo.caption">@currentUser.email</MudText>
     </MudStack>
     
     <MudDivider Class="mt-4 mb-8" />
 
     <MudStack Row="true" AlignItems="AlignItems.Center">
         <MudButton Class="justify-start" StartIcon="@Icons.Material.Filled.DriveFileRenameOutline" IconColor="Color.Info" OnClick="ChangeTeamName">Change team name</MudButton>
-        <MudText Typo="Typo.caption">@currentUser.TeamName</MudText>
+        <MudText Typo="Typo.caption">@currentUser.teamname</MudText>
     </MudStack>
     
     <br />
@@ -70,7 +70,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email))
         {
             Navigation.NavigateTo("/");
         }
@@ -84,7 +84,7 @@
 
     private async Task ChangeTeamName()
     {
-        newTeamName = currentUser.TeamName;
+        newTeamName = currentUser.teamname;
         overlayVisible = true;
     }    
     
@@ -99,7 +99,7 @@
         if (validate.Item1)
         {
             await FNFData.UpdateTeamNameAsync(currentUser, newTeamName);
-            CustomAuthenticationStateProvider.CurrentUser.TeamName = newTeamName;
+            CustomAuthenticationStateProvider.CurrentUser.teamname = newTeamName;
             overlayVisible = false;
         }
         
@@ -113,7 +113,7 @@
             return (false, "Team name must be at least 5 characters long");
         }
 
-        if ((await FNFData.GetAllUsersAsync()).Any(x => x.TeamName is not null && x.TeamName.ToLower().Equals(newTeamName.ToLower())))
+        if ((await FNFData.GetAllUsersAsync()).Any(x => x.teamname is not null && x.teamname.ToLower().Equals(newTeamName.ToLower())))
         {
             return (false, "That name is already taken");
         }
