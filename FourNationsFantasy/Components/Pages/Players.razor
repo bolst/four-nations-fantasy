@@ -63,7 +63,7 @@
         {
             <MudItem xs="0" sm="2"></MudItem>
             <MudItem xs="12" sm="8">
-                @if (player.Position == "G")
+                @if (player.position == "G")
                 {
                     <GoaliePointCard Player="player" />            
                 }
@@ -99,7 +99,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.Email))
+        if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email))
         {
             Navigation.NavigateTo("/");
         }
@@ -125,12 +125,12 @@ else
 
         if (!string.IsNullOrEmpty(currentNationality))
         {
-            filteredPlayers = filteredPlayers.Where(p => p.Nationality == currentNationality);
+            filteredPlayers = filteredPlayers.Where(p => p.nationality == currentNationality);
         }
 
         if (!string.IsNullOrEmpty(currentPosition))
         {
-            filteredPlayers = filteredPlayers.Where(p => p.Position == currentPosition);
+            filteredPlayers = filteredPlayers.Where(p => p.position == currentPosition);
         }
     }
 }

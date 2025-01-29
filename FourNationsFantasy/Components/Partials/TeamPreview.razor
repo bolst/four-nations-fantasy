@@ -3,11 +3,11 @@
 
 @if (User is not null)
 {
-    <a href=@($"roster/{User.Id}")>
+    <a href=@($"roster/{User.id}")>
         <MudPaper Class="pa-3 mud-theme-surface" Elevation="3">
             <MudStack Style="min-height: 100px" Row="true" AlignItems="AlignItems.Center">
-                <MudAvatar Color="Color.Primary">@User.TeamName.First()</MudAvatar>
-                <MudText Typo="Typo.subtitle2">@User.TeamName</MudText>
+                <MudAvatar Color="Color.Primary">@User.teamname.First()</MudAvatar>
+                <MudText Typo="Typo.subtitle2">@User.teamname</MudText>
             </MudStack>
             <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
                 @if (playerProfiles is not null && goalieProfiles is not null)
@@ -40,10 +40,10 @@
     
     protected override async Task OnInitializedAsync()
     {
-        if (User?.Id is not null)
+        if (User?.id is not null)
         {
-            playerProfiles = await FNFData.GetRosterPlayerTournamentGameLogsAsync(User.Id);
-            goalieProfiles = await FNFData.GetRosterGoalieTournamentGameLogsAsync(User.Id);
+            playerProfiles = await FNFData.GetRosterPlayerTournamentGameLogsAsync(User.id);
+            goalieProfiles = await FNFData.GetRosterGoalieTournamentGameLogsAsync(User.id);
         }
     }
 }

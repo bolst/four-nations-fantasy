@@ -57,7 +57,7 @@
     {
         if (Game is not null)
         {
-            (int homeScore, int awayScore) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.Id);
+            (int homeScore, int awayScore) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.id);
             
             // this is only scenario where user has guessed yet
             userHasNotGuessed = homeScore == 0 && awayScore == 0;

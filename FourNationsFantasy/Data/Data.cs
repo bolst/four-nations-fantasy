@@ -81,13 +81,7 @@ public class FNFData : QueryDapperBase, IFNFData
 
     public async Task<User?> GetUserByIdAsync(int userId)
     {
-        string sql = @"SELECT
-                          id AS Id,
-                          email AS Email,
-                          firstname AS FirstName,
-                          lastname AS LastName,
-                          teamname AS TeamName,
-                          role AS Role
+        string sql = @"SELECT *
                         FROM
                           accounts
                         WHERE id = @UserId";
@@ -96,13 +90,7 @@ public class FNFData : QueryDapperBase, IFNFData
     
     public async Task<User?> GetUserByEmailAsync(string email)
     {
-        string sql = @"SELECT
-                          id AS Id,
-                          email AS Email,
-                          firstname AS FirstName,
-                          lastname AS LastName,
-                          teamname AS TeamName,
-                          role AS Role
+        string sql = @"SELECT *
                         FROM
                           accounts
                         WHERE email = @Email";
@@ -111,13 +99,7 @@ public class FNFData : QueryDapperBase, IFNFData
 
     public async Task<IEnumerable<User>> GetAllUsersAsync()
     {
-        string sql = @"SELECT
-                          id AS Id,
-                          email AS Email,
-                          firstname AS FirstName,
-                          lastname AS LastName,
-                          teamname AS TeamName,
-                          role AS Role
+        string sql = @"SELECT *
                         FROM
                           accounts";
         return await QueryDbAsync<User>(sql);
@@ -125,32 +107,7 @@ public class FNFData : QueryDapperBase, IFNFData
     
     public async Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync()
     {
-        string cacheKey = "all_players";
-        
-        string sql = @"SELECT
-                          nhl_id AS NhlId,
-                          firstname AS FirstName,
-                          lastname AS LastName,
-                          position AS Position,
-                          nationality AS Nationality,
-                          user_id AS UserId,
-                          draft_number AS DraftNumber,
-                          games_played AS GamesPlayed,
-                          goals AS Goals,
-                          assists AS Assists,
-                          pp_points AS PowerplayPoints,
-                          sh_points AS ShorthandedPoints,
-                          shots_on_goal AS SOG,
-                          hits AS Hits,
-                          blocks AS Blocks,
-                          goalie_wins AS GoalieWins,
-                          goalie_gaa AS GoalieGAA,
-                          goalie_sv_pctg AS GoalieSvPctg,
-                          goalie_shutouts AS GoalieShutouts,
-                          goalie_saves AS GoalieSaves,
-                          goalie_goals_against AS GoalieGoalsAgainst,
-                          headshot AS Headshot,
-                          hero_image AS HeroImage
+        string sql = @"SELECT *
                         FROM
                           players";
         return await QueryDbAsync<FNFPlayer>(sql);
@@ -158,28 +115,7 @@ public class FNFData : QueryDapperBase, IFNFData
 
     public async Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId)
     {
-        string sql = @"SELECT
-                        P.nhl_id AS NhlId,
-                        P.firstname AS FirstName,
-                        P.lastname AS LastName,
-                        P.position AS Position,
-                        P.nationality AS Nationality,
-                        P.user_id AS UserId,
-                        P.draft_number AS DraftNumber,
-                        P.games_played AS GamesPlayed,
-                        P.goals AS Goals,
-                        P.assists AS Assists,
-                        P.pp_points AS PowerplayPoints,
-                        P.sh_points AS ShorthandedPoints,
-                        P.shots_on_goal AS SOG,
-                        P.hits AS Hits,
-                        P.blocks AS Blocks,
-                        P.goalie_wins AS GoalieWins,
-                        P.goalie_gaa AS GoalieGAA,
-                        P.goalie_sv_pctg AS GoalieSvPctg,
-                        P.goalie_shutouts AS GoalieShutouts,
-                        P.headshot AS Headshot,
-                        P.hero_image AS HeroImage
+        string sql = @"SELECT *
                       FROM
                         players P
                       WHERE
@@ -194,7 +130,7 @@ public class FNFData : QueryDapperBase, IFNFData
 
         List<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)> gameLogs = new();
 
-        foreach (var player in roster.Where(x => x.Position != "G"))
+        foreach (var player in roster.Where(x => x.position != "G"))
         {
             var gameLog = (await _nhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
                 Nhl.Api.Enumerations.Game.GameType.RegularSeason)).PlayerGameLogs;
@@ -217,7 +153,7 @@ public class FNFData : QueryDapperBase, IFNFData
 
         List<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)> gameLogs = new();
 
-        foreach (var player in roster.Where(x => x.Position == "G"))
+        foreach (var player in roster.Where(x => x.position == "G"))
         {
             var gameLog = (await _nhlApi.GetGoalieSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
                 Nhl.Api.Enumerations.Game.GameType.RegularSeason)).GoalieGameLogs;
@@ -289,28 +225,28 @@ public class FNFData : QueryDapperBase, IFNFData
                                           nf, nd, ng
                                         FROM
                                           num_forwards, num_defense, num_goalies";
-        (int nF, int nD, int nG) = await QueryDbSingleAsync<(int, int, int)>(positionsDraftedSql,  new { UserId = user.Id });
+        (int nF, int nD, int nG) = await QueryDbSingleAsync<(int, int, int)>(positionsDraftedSql,  new { UserId = user.id });
 
         // if someone already has 2 goalies
-        if (player.Position == "G" && nG >= MAX_GOALIES)
+        if (player.position == "G" && nG >= MAX_GOALIES)
         {
             return "You cannot draft more than 2 goalies";
         }
         
         // if someone has exceeded total # of players
-        if (player.Position == "F" || player.Position == "D")
+        if (player.position == "F" || player.position == "D")
         {
             if (nF + nD >= MAX_FORWARDS + MAX_DEFENSE + MAX_UTIL)
             {
                 return "You must draft 8 forwards, 4 defensemen and 1 utility";
             }
 
-            if (nF >= MAX_FORWARDS + MAX_UTIL && player.Position == "F")
+            if (nF >= MAX_FORWARDS + MAX_UTIL && player.position == "F")
             {
                 return "You cannot draft more than 9 forwards";
             }
 
-            if (nD >= MAX_DEFENSE + MAX_UTIL && player.Position == "D")
+            if (nD >= MAX_DEFENSE + MAX_UTIL && player.position == "D")
             {
                 return "You cannot draft more than 5 defensemen";
             }
@@ -322,7 +258,7 @@ public class FNFData : QueryDapperBase, IFNFData
                               draft_number = @DraftNumber
                             WHERE
                               nhl_id = @NhlId";
-        await ExecuteSqlAsync(sql, new { UserId = user.Id, DraftNumber = newDraftNumber, NhlId = player.NhlId });
+        await ExecuteSqlAsync(sql, new { UserId = user.id, DraftNumber = newDraftNumber, NhlId = player.nhl_id });
 
         return string.Empty;
     }
@@ -339,12 +275,7 @@ public class FNFData : QueryDapperBase, IFNFData
         const int teams = 6;
         int currentTeamId = teams - (int)Math.Abs((currentDraftNumber - 1) % (2 * teams) + 1 - teams - 0.5);
         
-        string sql = @"SELECT
-                          id AS Id,
-                          email AS Email,
-                          firstname AS FirstName,
-                          lastname AS LastName,
-                          teamname AS TeamName
+        string sql = @"SELECT *
                         FROM
                           accounts
                         WHERE id = @TeamId";
@@ -358,7 +289,7 @@ public class FNFData : QueryDapperBase, IFNFData
         string sql = @"UPDATE accounts
                         SET teamname = @TeamName
                         WHERE id = @UserId";
-        await ExecuteSqlAsync(sql, new { UserId = user.Id, TeamName = newName });
+        await ExecuteSqlAsync(sql, new { UserId = user.id, TeamName = newName });
     }
 
     public async Task<Nhl.Api.Models.Schedule.LeagueSchedule> GetTournamentScheduleAsync()
@@ -418,7 +349,7 @@ public class FNFData : QueryDapperBase, IFNFData
         // shuffle players and add each to list
         Random rng = new Random();
         int draftNumber = 1;
-        foreach (string nhlId in allPlayers.Select(x => x.NhlId).OrderBy(_ => rng.Next()))
+        foreach (string nhlId in allPlayers.Select(x => x.nhl_id).OrderBy(_ => rng.Next()))
         {
             // if a round is entered where not everyone gets a selection stop populating
             // e.g., if 92 players are available and 6 users drafting, stop after pick 90
@@ -427,7 +358,7 @@ public class FNFData : QueryDapperBase, IFNFData
                 break;
             }
             
-            usersAndDraftNumbers.Add( (nhlId, allUsers[draftNumber % numUsers].Id, draftNumber++) );
+            usersAndDraftNumbers.Add( (nhlId, allUsers[draftNumber % numUsers].id, draftNumber++) );
         }
 
         // supposedly this is the only way to do a bulk update w/ Dapper

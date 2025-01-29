@@ -82,12 +82,12 @@ public class ScoreCalculationService
 
     public double CalculatePlayerSeasonScore(FNFPlayer player)
     {
-        if (FantasyPointCache.TryGetValue(player.NhlId, out double score))
+        if (FantasyPointCache.TryGetValue(player.nhl_id, out double score))
         {
             return score;
         }
         
-        if (player.Position == "G")
+        if (player.position == "G")
         {
             score = CalculateGoalieSeasonScore(player);
         }
@@ -96,28 +96,28 @@ public class ScoreCalculationService
             score = CalculateSkaterSeasonScore(player);
         }
         
-        FantasyPointCache.Add(player.NhlId, score);
+        FantasyPointCache.Add(player.nhl_id, score);
 
         return score;
     }
 
     private double CalculateSkaterSeasonScore(FNFPlayer player)
     {
-        return player.Goals * Goal
-               + player.Assists * Assist
-               + player.PowerplayPoints * PowerplayPoint
-               + player.ShorthandedPoints * ShorthandedPoint
-               + player.SOG * ShotOnGoal
-               + player.Hits * Hit
-               + player.Blocks * Block; 
+        return player.goals * Goal
+               + player.assists * Assist
+               + player.pp_points * PowerplayPoint
+               + player.sh_points * ShorthandedPoint
+               + player.shots_on_goal * ShotOnGoal
+               + player.hits * Hit
+               + player.blocks * Block; 
     }
     
     private double CalculateGoalieSeasonScore(FNFPlayer player)
     {
-        return player.GoalieWins * GoalieWin
-               + player.GoalieGoalsAgainst * GoalieGoalAgainst
-               + player.GoalieSaves * GoalieSave
-               + player.GoalieShutouts * GoalieShutout;
+        return player.goalie_wins * GoalieWin
+               + player.goalie_goals_against * GoalieGoalAgainst
+               + player.goalie_saves * GoalieSave
+               + player.goalie_shutouts * GoalieShutout;
     }
 
     public IEnumerable<(string, double)> Categories()

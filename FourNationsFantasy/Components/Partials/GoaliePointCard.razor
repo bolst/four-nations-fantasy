@@ -6,13 +6,13 @@
         <MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center">
                 <MudAvatar Color="Color.Surface" Size="Size.Medium" Class="mr-3">
-                    <MudImage Src="@Player.Headshot" />
+                    <MudImage Src="@Player.headshot" />
                 </MudAvatar>
                 <div>
-                    <MudText Typo="Typo.h6">@Player.FirstName @Player.LastName</MudText>
+                    <MudText Typo="Typo.h6">@Player.firstname @Player.lastname</MudText>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        @Player.Position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.Nationality
-                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @Player.GoalieSvPctg.ToString("N2") SV% &nbsp; @Player.GoalieGAA.ToString("N2") GAA</span>
+                        @Player.position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.nationality
+                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @Player.goalie_sv_pctg.ToString("N2") SV% &nbsp; @Player.goalie_gaa.ToString("N2") GAA</span>
                     </MudText>
                 </div>
             </MudStack>

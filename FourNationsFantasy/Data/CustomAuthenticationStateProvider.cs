@@ -28,15 +28,15 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
         var principal = new ClaimsPrincipal();
         (User? user, bool isMasq) = await _userService.FetchUserFromBrowserAsync();
 
-        if (user?.Email is not null)
+        if (user?.email is not null)
         {
-            User? userInDb = await _userService.LookupUserInDatabase(user.Email);
+            User? userInDb = await _userService.LookupUserInDatabase(user.email);
 
             if (userInDb is not null)
             {
                 if (isMasq)
                 {
-                    userInDb.Role = "masq";
+                    userInDb.role = "masq";
                 }
                 principal = userInDb.ToClaimsPrincipal();
                 CurrentUser = userInDb;
