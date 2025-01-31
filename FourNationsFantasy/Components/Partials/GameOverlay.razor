@@ -24,12 +24,12 @@
             
             <MudText Typo="Typo.subtitle1"><b>Roster</b></MudText>
             
-            <MudTabs Centered>
+            <MudTabs KeepPanelsAlive Centered>
                 <MudTabPanel Text="@Game.AwayTeam.Abbrev">
-                    <TeamRoster TeamId="@Game.AwayTeam.Id" />
+                    <TeamRoster TeamAbbrev="@Game.AwayTeam.Abbrev" />
                 </MudTabPanel>                
                 <MudTabPanel Text="@Game.HomeTeam.Abbrev">
-                    <TeamRoster TeamId="@Game.HomeTeam.Id"/>
+                    <TeamRoster TeamAbbrev="@Game.HomeTeam.Abbrev"/>
                 </MudTabPanel>
             </MudTabs>
             
