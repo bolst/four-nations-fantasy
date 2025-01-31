@@ -5,7 +5,7 @@
 {
     <MudPaper Class="pa-4" Style="max-width: 100%;" Elevation="3">
         <MudGrid>
-            <MudItem Class="d-flex align-center justify-center" xs="7">
+            <MudItem Class="d-flex align-center justify-center" xs="7" @onclick=@( () => _gameOverlayVisible = true )>
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
                     <MudStack AlignItems="AlignItems.Center">
                         <MudAvatar>
@@ -29,18 +29,19 @@
                     
                     @if (userHasNotGuessed)
                     {
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick=@( () => _overlayVisible = true ) StartIcon="@Icons.Material.Filled.Scoreboard">Guess Score</MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick=@( () => _guessOverlayVisible = true ) StartIcon="@Icons.Material.Filled.Scoreboard">Guess Score</MudButton>
                     }
                     else
                     {
-                        <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick=@( () => _overlayVisible = true ) StartIcon="@Icons.Material.Filled.Edit">Edit Guess</MudButton>
+                        <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick=@( () => _guessOverlayVisible = true ) StartIcon="@Icons.Material.Filled.Edit">Edit Guess</MudButton>
                     }
                 </MudStack>
             </MudItem>
         </MudGrid>
     </MudPaper>
 
-    <GuessGameScoreOverlay @bind-Visible="_overlayVisible" Game="Game" OnGuess="OnGuess" />
+    <GuessGameScoreOverlay @bind-Visible="_guessOverlayVisible" Game="Game" OnGuess="OnGuess" />
+    <GameOverlay @bind-Visible="_gameOverlayVisible" Game="Game" />
 }
 
 @code{
@@ -48,8 +49,11 @@
     [Parameter]
     public Nhl.Api.Models.Schedule.Game Game { get; set; }
 
-    private bool _overlayVisible { get; set; }
-    private bool overlayVisible = false;
+    private bool _guessOverlayVisible { get; set; }
+    private bool guessOverlayVisible = false;
+
+    private bool _gameOverlayVisible { get; set; }
+    private bool gameOverlayVisible = false;
 
     private bool userHasNotGuessed = false;
     

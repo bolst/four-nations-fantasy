@@ -1,0 +1,65 @@
+@inject NavigationManager Navigation
+@inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+    
+<MudOverlay Visible="@Visible" VisibleChanged="OnVisibleChanged" DarkBackground LockScroll>
+    <MudPaper Class="pa-4">
+        <div style="width: 100%" class="d-flex justify-end">
+            <MudIconButton OnClick=@( async () => await OnVisibleChanged(false) ) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small" />
+        </div>
+        <MudSwipeArea OnSwipeEnd="@((e) => OnSwipe(e))">
+            <MudStack Class="px-4" AlignItems="AlignItems.Center" Row="true" Justify="Justify.SpaceBetween" Spacing="16">
+                <MudText Typo="Typo.h5" Align="Align.Start">@Game.AwayTeam.Abbrev</MudText>
+                
+                <MudStack Spacing="0">
+                    <MudText Typo="Typo.subtitle1" Align="Align.Center"><b>@Game.StartTimeUTC.ToString("hh:mm")</b></MudText>
+                    <MudText Typo="Typo.subtitle1" Align="Align.Center">@Game.StartTimeUTC.ToString("yyyy-dd-MM")</MudText>
+                </MudStack>
+
+                <MudText Typo="Typo.h5" Align="Align.End">@Game.HomeTeam.Abbrev</MudText>
+            </MudStack>
+            
+            <MudDivider Class="my-6" />
+            
+            <MudText Typo="Typo.subtitle1"><b>Roster</b></MudText>
+            
+            <MudTabs Centered>
+                <MudTabPanel Text="@Game.AwayTeam.Abbrev">
+                    <TeamRoster TeamId="@Game.AwayTeam.Id" />
+                </MudTabPanel>                
+                <MudTabPanel Text="@Game.HomeTeam.Abbrev">
+                    <TeamRoster TeamId="@Game.HomeTeam.Id"/>
+                </MudTabPanel>
+            </MudTabs>
+            
+        </MudSwipeArea>
+    </MudPaper>
+</MudOverlay>
+
+@code {
+    
+    [Parameter]
+    public bool Visible { get; set; }
+    
+    [Parameter]
+    public EventCallback<bool> VisibleChanged { get; set; }
+
+    [Parameter]
+    public Nhl.Api.Models.Schedule.Game Game { get; set; }
+
+    private async Task OnVisibleChanged(bool visible)
+    {
+        Visible = visible;
+        await VisibleChanged.InvokeAsync(visible);
+    }
+
+    private async Task OnSwipe(SwipeEventArgs swipeArgs)
+    {
+        if (swipeArgs.SwipeDirection == SwipeDirection.TopToBottom)
+        {
+            await OnVisibleChanged(false);
+        }
+    }
+
+}
