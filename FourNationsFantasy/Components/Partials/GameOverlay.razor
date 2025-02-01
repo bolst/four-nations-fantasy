@@ -10,19 +10,33 @@
         </div>
         <MudSwipeArea OnSwipeEnd="@((e) => OnSwipe(e))">
             <MudStack Class="px-4" AlignItems="AlignItems.Center" Row="true" Justify="Justify.SpaceBetween" Spacing="16">
-                <MudText Typo="Typo.h5" Align="Align.Start">@Game.AwayTeam.Abbrev</MudText>
-                
+                <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar>
+                        <MudImage Src=@($"{Game.AwayTeam.Abbrev}-logo.svg")></MudImage>
+                    </MudAvatar>
+                    <MudText Typo="Typo.h5" Align="Align.Start">@Game.AwayTeam.Abbrev</MudText>
+                </MudStack>
+
                 <MudStack Spacing="0">
                     <MudText Typo="Typo.subtitle1" Align="Align.Center"><b>@Game.StartTimeUTC.ToString("hh:mm")</b></MudText>
                     <MudText Typo="Typo.subtitle1" Align="Align.Center">@Game.StartTimeUTC.ToString("yyyy-dd-MM")</MudText>
                 </MudStack>
 
-                <MudText Typo="Typo.h5" Align="Align.End">@Game.HomeTeam.Abbrev</MudText>
+                <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar>
+                        <MudImage Src=@($"{Game.HomeTeam.Abbrev}-logo.svg")></MudImage>
+                    </MudAvatar>
+                    <MudText Typo="Typo.h5" Align="Align.Start">@Game.HomeTeam.Abbrev</MudText>
+                </MudStack>
             </MudStack>
             
             <MudDivider Class="my-6" />
             
-            <MudText Typo="Typo.subtitle1"><b>Roster</b></MudText>
+            <GameGoalsByPeriod Game="@Game" />
+            
+            <MudDivider Class="my-6" />
+            
+            <MudText Typo="Typo.subtitle1"><b>Game Sheets</b></MudText>
             
             <MudTabs KeepPanelsAlive Centered>
                 <MudTabPanel Text="@Game.AwayTeam.Abbrev">
