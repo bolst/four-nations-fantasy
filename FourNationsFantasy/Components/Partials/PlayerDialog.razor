@@ -1,0 +1,83 @@
+@using Nhl.Api.Enumerations.Game
+@inject Nhl.Api.INhlApi NhlApi
+
+@if (PlayerInfo is not null)
+{
+<MudDialog TitleClass="pa-0" ContentStyle="min-height: 400px">
+    <TitleContent>
+        <div style="@backgroundCss(PlayerInfo)">
+            <div style="width: 100%" class="d-flex justify-end">
+                <MudIconButton OnClick=@(() => MudDialog.Close()) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small"/>
+            </div>
+            <MudStack Class="px-4" Row="true" AlignItems="AlignItems.Center">
+                <MudImage Src="@PlayerInfo.headshot" Width="150"/>
+                <MudStack Style="width: 100%">
+                    <MudText Class="white-text" Typo="Typo.h6">@PlayerInfo.firstname @PlayerInfo.lastname</MudText>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
+
+                        <MudStack AlignItems="AlignItems.Center">
+                            <MudText Class="white-text" Typo="Typo.caption">GP</MudText>
+                            <MudText Class="white-text" Typo="Typo.h6"><b>@PlayerInfo.games_played</b></MudText>
+                        </MudStack>
+
+                        <MudStack AlignItems="AlignItems.Center">
+                            <MudText Class="white-text" Typo="Typo.caption">G</MudText>
+                            <MudText Class="white-text" Typo="Typo.h6"><b>@PlayerInfo.goals</b></MudText>
+                        </MudStack>
+
+                        <MudStack AlignItems="AlignItems.Center">
+                            <MudText Class="white-text" Typo="Typo.caption">A</MudText>
+                            <MudText Class="white-text" Typo="Typo.h6"><b>@PlayerInfo.assists</b></MudText>
+                        </MudStack>
+
+                        <MudStack AlignItems="AlignItems.Center">
+                            <MudText Class="white-text" Typo="Typo.caption">P</MudText>
+                            <MudText Class="white-text" Typo="Typo.h6"><b>@PlayerInfo.Points</b></MudText>
+                        </MudStack>
+
+                    </MudStack>
+
+                </MudStack>
+            </MudStack>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudTabs Centered>
+            <MudTabPanel Text="4 Nations">
+                @if (playerGameLog is not null)
+                {
+                    @* <PlayerGameLog GameLogs="playerGameLog"/> *@
+                }
+            </MudTabPanel>
+            <MudTabPanel Text="Reg. Season">
+                @if (playerGameLog is not null)
+                {
+                    <PlayerGameLog GameLogs="playerGameLog"/>
+                }
+            </MudTabPanel>
+        </MudTabs>
+    </DialogContent>
+</MudDialog>
+        }
+
+@code {
+    
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    
+    [Parameter]
+    public Data.FNFPlayer? PlayerInfo { get; set; }
+
+    private Nhl.Api.Models.Game.PlayerSeasonGameLog? playerGameLog;
+
+    private string backgroundCss(Data.FNFPlayer player) => $"background: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url({player.hero_image}); background-size: 100% auto;";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (PlayerInfo is not null)
+        {
+            playerGameLog = await NhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(PlayerInfo.NhlIdInt, "20242025", GameType.RegularSeason);
+        }
+    }
+
+}

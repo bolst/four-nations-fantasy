@@ -1,8 +1,9 @@
 @inject Data.IFNFData FNFData
+@inject IDialogService DialogService
 
 @if (Player is not null)
 {
-    <MudPaper Class="pa-4 my-1" Elevation="3" @onclick=@(() => overlayVisible = true )>
+    <MudPaper Class="pa-4 my-1" Elevation="3" @onclick="@ShowOverlay">
         <MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center">
                 <MudAvatar Color="Color.Surface" Size="Size.Medium" Class="mr-3">
@@ -18,8 +19,6 @@
             </MudStack>
         </MudStack>
     </MudPaper>
-
-    <GoalieOverlay @bind-Visible="overlayVisible" PlayerInfo="Player" />
 }
 
 
@@ -28,6 +27,16 @@
     [Parameter]
     public Data.FNFPlayer? Player { get; set; }
 
-    private bool overlayVisible = false;
+    private Task ShowOverlay()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var parameters = new DialogParameters<GoalieDialog>
+        {
+            { x => x.PlayerInfo, Player }
+        };
+
+        return DialogService.ShowAsync<GoalieDialog>("Goalie", parameters, options);
+    }
 
 }
