@@ -44,28 +44,8 @@
     
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
-    
-    [Parameter]
-    public bool Visible { get; set; }
-    
-    [Parameter]
-    public EventCallback<bool> VisibleChanged { get; set; }
 
     [Parameter]
     public Nhl.Api.Models.Schedule.Game Game { get; set; }
-
-    private async Task OnVisibleChanged(bool visible)
-    {
-        Visible = visible;
-        await VisibleChanged.InvokeAsync(visible);
-    }
-
-    private async Task OnSwipe(SwipeEventArgs swipeArgs)
-    {
-        if (swipeArgs.SwipeDirection == SwipeDirection.TopToBottom)
-        {
-            await OnVisibleChanged(false);
-        }
-    }
 
 }
