@@ -4,10 +4,10 @@
 {
     <MudTabs KeepPanelsAlive Centered>
         <MudTabPanel Text="@Game.AwayTeam.Abbrev">
-            <TeamScoreSheet Abbrev="@Game.AwayTeam.Abbrev" />
+            <TeamScoreSheet Game="@Game" Home="false" />
         </MudTabPanel>
         <MudTabPanel Text="@Game.HomeTeam.Abbrev">
-            <TeamScoreSheet Abbrev="@Game.HomeTeam.Abbrev" />
+            <TeamScoreSheet Game="@Game" Home="true" />
         </MudTabPanel>
     </MudTabs>
 }
@@ -16,5 +16,5 @@
     
     [Parameter]
     public Nhl.Api.Models.Schedule.Game? Game { get; set; }
-
+    
 }

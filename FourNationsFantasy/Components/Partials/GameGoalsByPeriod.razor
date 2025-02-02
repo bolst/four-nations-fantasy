@@ -3,24 +3,23 @@
 @if (Game is not null && boxScore is not null)
 {
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText>@Game.AwayTeam.Abbrev</MudText>
-        
+        <MudStack AlignItems="AlignItems.Start">
+            &nbsp;
+            <MudText>@Game.AwayTeam.Abbrev</MudText>
+            <MudText>@Game.HomeTeam.Abbrev</MudText>
+        </MudStack>
+
         <MudStack Row="true" AlignItems="AlignItems.Center">
-            <MudText>@GetGamePeriodScore(1).Item1</MudText>
-            <MudText>@GetGamePeriodScore(2).Item1</MudText>
-            <MudText>@GetGamePeriodScore(3).Item1</MudText>
-        </MudStack>        
+            @foreach (var score in GetGamePeriodScores())
+            {
+                <MudStack AlignItems="AlignItems.Center">
+                    <MudText Color="Color.Secondary">@score.Item1</MudText>
+                    <MudText>@score.Item2</MudText>
+                    <MudText>@score.Item3</MudText>
+                </MudStack>
+            }
+        </MudStack>
     </MudStack>    
-    
-    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-        <MudText>@Game.HomeTeam.Abbrev</MudText>
-        
-        <MudStack Row="true" AlignItems="AlignItems.Center">
-            <MudText>@GetGamePeriodScore(1).Item2</MudText>
-            <MudText>@GetGamePeriodScore(2).Item2</MudText>
-            <MudText>@GetGamePeriodScore(3).Item2</MudText>
-        </MudStack>        
-    </MudStack>
 }
 
 @code {
@@ -28,21 +27,33 @@
     [Parameter]
     public Nhl.Api.Models.Schedule.Game? Game { get; set; }
 
-    private bool IsLiveOrComplete => Game?.GameState != "OFF";
-
     private Nhl.Api.Models.Game.GameCenterBoxScore? boxScore;
-
-    private (string, string) GetGamePeriodScore(int period)
+    
+    private IEnumerable<(string, string, string)> GetGamePeriodScores()
     {
-        if (boxScore is null) return ("-", "-");
-
-        if (boxScore.Boxscore.Linescore is not null && boxScore.Boxscore.Linescore.ByPeriod.Any(p => p.PeriodDescriptor.Number == period))
+        if (boxScore?.Boxscore.Linescore is not null)
         {
-            var periodScore = boxScore.Boxscore.Linescore.ByPeriod.First(p => p.PeriodDescriptor.Number == period);
-            return (periodScore.Away.ToString(), periodScore.Home.ToString());
+            var periodScores = boxScore.Boxscore.Linescore.ByPeriod.Select(x =>
+            {
+                string period = x.PeriodDescriptor.Number.ToString();
+                if (x.PeriodDescriptor.PeriodType != "REG") period = x.PeriodDescriptor.PeriodType;
+                
+                return (period, x.Away.ToString(), x.Home.ToString());
+            }).ToList();
+
+            // ensure all 3 periods are included, even if they have not been played yet
+            for (int i = periodScores.Count() + 1; i <= 3; i++)
+            {
+                periodScores.Add((i.ToString(), "-", "-"));
+            }
+            
+            // total score for both teams
+            periodScores.Add(("T", boxScore.AwayTeam.Score.ToString(), boxScore.HomeTeam.Score.ToString()));
+
+            return periodScores;
         }
         
-        return ("-", "-");
+        return [("1", "-", "-"), ("2", "-", "-"), ("3", "-", "-"), ("T", "-", "-")];
     }
 
     protected override async Task OnInitializedAsync()
