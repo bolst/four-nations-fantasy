@@ -1,0 +1,20 @@
+@inject Data.IFNFData FNFData
+
+@if (Game is not null)
+{
+    <MudTabs KeepPanelsAlive Centered>
+        <MudTabPanel Text="@Game.AwayTeam.Abbrev">
+            <TeamScoreSheet Abbrev="@Game.AwayTeam.Abbrev" />
+        </MudTabPanel>
+        <MudTabPanel Text="@Game.HomeTeam.Abbrev">
+            <TeamScoreSheet Abbrev="@Game.HomeTeam.Abbrev" />
+        </MudTabPanel>
+    </MudTabs>
+}
+
+@code {
+    
+    [Parameter]
+    public Nhl.Api.Models.Schedule.Game? Game { get; set; }
+
+}

@@ -1,11 +1,12 @@
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Data.IFNFData FNFData
+@inject IDialogService DialogService
 
 @if (Game is not null)
 {
     <MudPaper Class="pa-4" Style="max-width: 100%;" Elevation="3">
         <MudGrid>
-            <MudItem Class="d-flex align-center justify-center" xs="7" @onclick=@( () => _gameOverlayVisible = true )>
+            <MudItem Class="d-flex align-center justify-center" xs="7" @onclick="@OpenGameOverlay">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
                     <MudStack AlignItems="AlignItems.Center">
                         <MudAvatar>
@@ -24,7 +25,7 @@
             </MudItem>
             <MudItem xs="5">
                 <MudStack AlignItems="AlignItems.Center" Spacing="2">
-                    <MudText Color="Color.Surface">@Game.StartTimeUTC.AddHours(-5).ToString("hh:mm tt")</MudText>
+                    <MudText Color="Color.Surface">@Game.StartTimeUTC.AddHours(-5).ToString("h:mm tt")</MudText>
                     <MudText Color="Color.Surface">@Game.Venue.Default</MudText>
                     
                     @if (userHasNotGuessed)
@@ -41,7 +42,6 @@
     </MudPaper>
 
     <GuessGameScoreOverlay @bind-Visible="_guessOverlayVisible" Game="Game" OnGuess="OnGuess" />
-    <GameOverlay @bind-Visible="_gameOverlayVisible" Game="Game" />
 }
 
 @code{
@@ -51,9 +51,6 @@
 
     private bool _guessOverlayVisible { get; set; }
     private bool guessOverlayVisible = false;
-
-    private bool _gameOverlayVisible { get; set; }
-    private bool gameOverlayVisible = false;
 
     private bool userHasNotGuessed = false;
     
@@ -71,5 +68,17 @@
     private void OnGuess(bool status)
     {
         userHasNotGuessed = status;
+    }
+
+    private Task OpenGameOverlay()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, NoHeader = true};
+
+        var parameters = new DialogParameters<GameDialog>
+        {
+            { x => x.Game, Game }
+        };
+
+        return DialogService.ShowAsync<GameDialog>("Game", parameters, options);
     }
 }

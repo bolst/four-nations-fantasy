@@ -1,0 +1,95 @@
+@inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
+
+@if (roster is not null)
+{
+    <MudSimpleTable Style="height: 55vh;" Striped FixedHeader Dense>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th><MudText>FORWARDS</MudText></th>
+            <th>G</th>
+            <th>A</th>
+            <th>FP</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var player in roster.Where(x => x.position == "F"))
+        {
+        <tr>
+            <td>0</td>
+            <td>@($"{player.firstname.First()}. {player.lastname}")</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0.00</td>
+        </tr>
+        }
+        </tbody>
+
+        <br/>
+
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>DEFENSEMEN</th>
+            <th>G</th>
+            <th>A</th>
+            <th>FP</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var player in roster.Where(p => p.position == "D"))
+        {
+        <tr>
+            <td>0</td>
+            <td>@($"{player.firstname.First()}. {player.lastname}")</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0.00</td>
+        </tr>
+        }
+        </tbody>
+
+        <br />
+
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>GOALIES</th>
+            <td>SH</td>
+            <td>GA</td>
+            <td>FP</td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var player in roster.Where(p => p.position == "G"))
+        {
+        <tr>
+            <td>0</td>
+            <td>@($"{player.firstname.First()}. {player.lastname}")</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        }
+        </tbody>
+    </MudSimpleTable>
+}
+
+
+@code {
+    
+    [Parameter]
+    public string? Abbrev { get; set; }
+
+    private IEnumerable<Data.FNFPlayer>? roster;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Abbrev))
+        {
+            roster = await FNFData.GetRosterByCountryAsync(Abbrev);
+        }
+    }
+    
+}
