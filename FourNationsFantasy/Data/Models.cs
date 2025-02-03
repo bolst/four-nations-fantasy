@@ -32,7 +32,7 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public int goalie_goals_against { get; set; }
     public int goalie_saves { get; set; }
 
-    public int? Points => goals + assists;
+    public int Points => goals + assists;
     #endregion
 
     public int NhlIdInt => int.Parse(nhl_id);

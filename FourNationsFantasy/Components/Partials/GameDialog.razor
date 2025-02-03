@@ -29,9 +29,16 @@
             </MudStack>
 
             <MudDivider Class="my-6" Light />
-
-            <GameGoalsByPeriod Game="@Game"/>
-
+            
+            @if (IsLiveOrComplete)
+            {
+                <GameGoalsByPeriod Game="@Game"/>
+            }
+            else
+            {
+                <PlayersToWatch Game="@Game" />
+            }
+            
             <MudDivider Class="my-6" Light />
             
             <GameScoreSheet Game="@Game" />
@@ -47,5 +54,11 @@
 
     [Parameter]
     public Nhl.Api.Models.Schedule.Game Game { get; set; }
+
+    private bool IsLiveOrComplete => Game?.GameState != "FUT";
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
 
 }

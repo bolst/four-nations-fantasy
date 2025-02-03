@@ -77,15 +77,17 @@
             if (players is not null)
             {
                 <thead>
-                    <tr class="mud-secondary-text">
-                        <th>PLAYERS</th>
-                        <th>POS</th>
-                    </tr>
+                <tr class="mud-secondary-text">
+                    <th>#</th>
+                    <th>PLAYERS</th>
+                    <th>POS</th>
+                </tr>
                 </thead>
                 <tbody>
                     @foreach (var player in players)
                     {
                         <tr>
+                            <td>@player.sweater_number</td>
                             <td>@($"{player.firstname.First()}. {player.lastname}")</td>
                             <td>@player.position</td>
                         </tr>
