@@ -1,0 +1,168 @@
+@inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
+
+<MudSimpleTable Style="height: 400px;" Striped FixedHeader Dense>
+    @if (boxScore is not null)
+    {
+        if (IsLiveOrComplete)
+        {
+                <thead>
+                <tr class="mud-secondary-text">
+                    <th>#</th>
+                    <th><MudText>FORWARDS</MudText></th>
+                    <th>G</th>
+                    <th>A</th>
+                    <th>FP</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var forward in Forwards)
+                {
+                    <tr>
+                        <td>@forward.SweaterNumber</td>
+                        <td>@forward.Name.Default</td>
+                        <td>@forward.Goals</td>
+                        <td>@forward.Assists</td>
+                        <td>0.00</td>
+                    </tr>
+                }
+                </tbody>
+
+                <thead>
+                <tr class="mud-secondary-text">
+                    <th>#</th>
+                    <th>DEFENSEMEN</th>
+                    <th>G</th>
+                    <th>A</th>
+                    <th>FP</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var defense in Defensemen)
+                {
+                    <tr>
+                        <td>@defense.SweaterNumber</td>
+                        <td>@defense.Name.Default</td>
+                        <td>@defense.Goals</td>
+                        <td>@defense.Assists</td>
+                        <td>0.00</td>
+                    </tr>
+                }
+                </tbody>
+
+                <thead>
+                <tr class="mud-secondary-text">
+                    <th>#</th>
+                    <th>GOALIES</th>
+                    <td>SH</td>
+                    <td>GA</td>
+                    <td>FP</td>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var goalie in Goalies)
+                {
+                    <tr>
+                        <td>@goalie.SweaterNumber</td>
+                        <td>@goalie.Name.Default</td>
+                        <td>@goalie.SaveShotsAgainst</td>
+                        <td>@goalie.GoalsAgainst</td>
+                        <td>0.00</td>
+                    </tr>
+                }
+                </tbody>
+        }
+        else
+        {
+            if (players is not null)
+            {
+                <thead>
+                <tr class="mud-secondary-text">
+                    <th>#</th>
+                    <th>PLAYERS</th>
+                    <th>POS</th>
+                </tr>
+                </thead>
+                <tbody>
+                    @foreach (var player in players)
+                    {
+                        <tr>
+                            <td>@player.sweater_number</td>
+                            <td>@($"{player.firstname.First()}. {player.lastname}")</td>
+                            <td>@player.position</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        }
+
+    }
+</MudSimpleTable>
+
+
+@code {
+    
+    [Parameter] 
+    public Nhl.Api.Models.Schedule.Game? Game { get; set; }
+
+    [Parameter] 
+    public bool Home { get; set; } = true;
+    
+    private Nhl.Api.Models.Game.GameCenterBoxScore? boxScore;
+
+    private bool IsLiveOrComplete => boxScore?.GameState != "FUT";
+
+    private List<Nhl.Api.Models.Game.GameCenterBoxScoreForward> Forwards
+    {
+        get
+        {
+            if (boxScore?.PlayerByGameStatistics is not null)
+            {
+                return Home ? boxScore.PlayerByGameStatistics.HomeTeam.Forwards : boxScore.PlayerByGameStatistics.AwayTeam.Forwards;
+            }
+            return new();
+        }
+    }
+    
+    private List<Nhl.Api.Models.Game.GameCenterBoxScoreDefense> Defensemen
+    {
+        get
+        {
+            if (boxScore?.PlayerByGameStatistics is not null)
+            {
+                return Home ? boxScore.PlayerByGameStatistics.HomeTeam.Defense : boxScore.PlayerByGameStatistics.AwayTeam.Defense;
+            }
+            return new();
+        }
+    }
+    
+    private List<Nhl.Api.Models.Game.GameCenterBoxScoreGoalie> Goalies
+    {
+        get
+        {
+            if (boxScore?.PlayerByGameStatistics is not null)
+            {
+                return Home ? boxScore.PlayerByGameStatistics.HomeTeam.Goalies : boxScore.PlayerByGameStatistics.AwayTeam.Goalies;
+            }
+            return new();
+        }
+    }
+
+    private IEnumerable<Data.FNFPlayer>? players;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (Game is not null)
+        {
+            boxScore = await NhlApi.GetGameCenterBoxScoreByGameIdAsync(Game.Id);
+
+            if (!IsLiveOrComplete)
+            {
+                string abbrev = Home ? Game.HomeTeam.Abbrev : Game.AwayTeam.Abbrev;
+                players = await FNFData.GetRosterByCountryAsync(abbrev);
+                players = players.OrderBy(p => p.position == "G").ThenBy(p => p.position == "D");
+            }
+        }
+    }
+
+}

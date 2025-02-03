@@ -61,6 +61,7 @@ public interface IFNFData
     Task AddPlayerGameGuess(int gameId, int userId, int homeScore, int awayScore);
     Task SimulateDraft();
     Task ResetRosters();
+    Task<IEnumerable<FNFPlayer>> GetRosterByCountryAsync(string abbrev);
 }
 
 public class FNFData : QueryDapperBase, IFNFData
@@ -386,6 +387,17 @@ public class FNFData : QueryDapperBase, IFNFData
                           user_id = null,
                           draft_number = null";
         await ExecuteSqlAsync(sql);
+    }
+
+    public async Task<IEnumerable<FNFPlayer>> GetRosterByCountryAsync(string abbrev)
+    {
+        string sql = @"SELECT
+                          *
+                        FROM
+                          players
+                        WHERE
+                          nationality = @Abbrev";
+        return await QueryDbAsync<FNFPlayer>(sql, new { Abbrev = abbrev });
     }
 }
 

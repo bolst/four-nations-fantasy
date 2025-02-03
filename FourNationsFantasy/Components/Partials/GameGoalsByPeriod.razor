@@ -1,0 +1,67 @@
+@inject Nhl.Api.INhlApi NhlApi
+
+@if (Game is not null && boxScore is not null)
+{
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudStack AlignItems="AlignItems.Start">
+            &nbsp;
+            <MudText>@Game.AwayTeam.Abbrev</MudText>
+            <MudText>@Game.HomeTeam.Abbrev</MudText>
+        </MudStack>
+
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            @foreach (var score in GetGamePeriodScores())
+            {
+                <MudStack AlignItems="AlignItems.Center">
+                    <MudText Color="Color.Secondary">@score.Item1</MudText>
+                    <MudText>@score.Item2</MudText>
+                    <MudText>@score.Item3</MudText>
+                </MudStack>
+            }
+        </MudStack>
+    </MudStack>    
+}
+
+@code {
+    
+    [Parameter]
+    public Nhl.Api.Models.Schedule.Game? Game { get; set; }
+
+    private Nhl.Api.Models.Game.GameCenterBoxScore? boxScore;
+    
+    private IEnumerable<(string, string, string)> GetGamePeriodScores()
+    {
+        if (boxScore?.Boxscore.Linescore is not null)
+        {
+            var periodScores = boxScore.Boxscore.Linescore.ByPeriod.Select(x =>
+            {
+                string period = x.PeriodDescriptor.Number.ToString();
+                if (x.PeriodDescriptor.PeriodType != "REG") period = x.PeriodDescriptor.PeriodType;
+                
+                return (period, x.Away.ToString(), x.Home.ToString());
+            }).ToList();
+
+            // ensure all 3 periods are included, even if they have not been played yet
+            for (int i = periodScores.Count() + 1; i <= 3; i++)
+            {
+                periodScores.Add((i.ToString(), "-", "-"));
+            }
+            
+            // total score for both teams
+            periodScores.Add(("T", boxScore.AwayTeam.Score.ToString(), boxScore.HomeTeam.Score.ToString()));
+
+            return periodScores;
+        }
+        
+        return [("1", "-", "-"), ("2", "-", "-"), ("3", "-", "-"), ("T", "-", "-")];
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Game is not null)
+        {
+            boxScore = await NhlApi.GetGameCenterBoxScoreByGameIdAsync(Game.Id);
+        }
+    }
+
+}

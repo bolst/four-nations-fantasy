@@ -13,6 +13,7 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public int? user_id { get; set; }
     public string? headshot { get; set; }
     public string? hero_image { get; set; }
+    public int sweater_number { get; set; }
 
     #region Season totals
 
@@ -31,7 +32,7 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public int goalie_goals_against { get; set; }
     public int goalie_saves { get; set; }
 
-    public int? Points => goals + assists;
+    public int Points => goals + assists;
     #endregion
 
     public int NhlIdInt => int.Parse(nhl_id);

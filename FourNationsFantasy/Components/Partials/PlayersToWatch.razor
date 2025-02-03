@@ -1,0 +1,130 @@
+@inject Data.IFNFData FNFData
+
+@if (Game is not null && categoryLeaders is not null)
+{
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudAvatar>
+            <MudImage Src=@($"{Game.AwayTeam.Abbrev}-logo.svg")/>
+        </MudAvatar>
+        
+        <MudStack AlignItems="AlignItems.Center" Spacing="0">
+            <MudText Typo="Typo.subtitle2">Players to Watch</MudText>
+            <MudText Typo="Typo.caption">Season Totals</MudText>
+        </MudStack>
+
+        <MudAvatar>
+            <MudImage Src=@($"{Game.HomeTeam.Abbrev}-logo.svg")/>
+        </MudAvatar>
+    </MudStack>
+
+    <MudGrid Class="mt-4 align-center"  Spacing="2">
+        @foreach (var leader in categoryLeaders)
+        {
+            <MudItem Class="d-flex justify-start" xs="3">
+                <MudAvatar Size="Size.Large">
+                    <MudImage Src="@leader.Item2.headshot" />
+                </MudAvatar>
+            </MudItem>
+            
+            <MudItem Class="d-flex justify-start" xs="1">
+                <MudText Typo="Typo.overline">@GetPlayerCategoryValue(leader.Item1, leader.Item2)</MudText>
+            </MudItem>    
+            
+            <MudItem xs="4">
+                <MudText Class="d-flex justify-center" Typo="Typo.overline">@leader.Item1</MudText>
+            </MudItem>  
+            
+            <MudItem Class="d-flex justify-end" xs="1">
+                <MudText Typo="Typo.overline">@GetPlayerCategoryValue(leader.Item1, leader.Item3)</MudText>
+            </MudItem>
+            
+            <MudItem Class="d-flex justify-end" xs="3">
+                <MudAvatar Size="Size.Large">
+                    <MudImage Src="@leader.Item3.headshot" />
+                </MudAvatar>
+            </MudItem>
+            
+            <MudItem xs="@GetPlayerCategoryGridProportions(leader.Item1, leader.Item2, leader.Item3).Item1">
+                <MudPaper Height="5px" Style=@($"background-color: {GetCountryColor(Game.AwayTeam.Abbrev)};")>
+                    &nbsp;
+                </MudPaper>
+            </MudItem>            
+            
+            <MudItem xs="@GetPlayerCategoryGridProportions(leader.Item1, leader.Item2, leader.Item3).Item2">
+                <MudPaper Height="5px" Style=@($"background-color: {GetCountryColor(Game.HomeTeam.Abbrev)};")>
+                    &nbsp;
+                </MudPaper>
+            </MudItem>
+            
+            <MudItem xs="6">
+                <MudText Class="d-flex justify-start" Typo="Typo.overline">@($"{leader.Item2.firstname.First()}. {leader.Item2.lastname}")</MudText>
+            </MudItem>
+            
+            <MudItem xs="6">
+                <MudText Class="d-flex justify-end" Typo="Typo.overline">@($"{leader.Item3.firstname.First()}. {leader.Item3.lastname}")</MudText>
+            </MudItem>
+            
+        }
+    </MudGrid>
+}
+
+@code {
+
+    [Parameter] 
+    public Nhl.Api.Models.Schedule.Game? Game { get; set; }
+
+    private IEnumerable<(string, Data.FNFPlayer, Data.FNFPlayer)>? categoryLeaders;    
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Game is not null && Game.HomeTeam.Abbrev != "TBD" && Game.AwayTeam.Abbrev != "TBD")
+        {
+            var awayTeam = (await FNFData.GetRosterByCountryAsync(Game.AwayTeam.Abbrev)).ToList();
+            var homeTeam = (await FNFData.GetRosterByCountryAsync(Game.HomeTeam.Abbrev)).ToList();
+
+            var awayGoalLeader = awayTeam.MaxBy(p => p.goals);
+            var homeGoalLeader = homeTeam.MaxBy(p => p.goals);
+            var awayAssistLeader = awayTeam.MaxBy(p => p.assists);
+            var homeAssistLeader = homeTeam.MaxBy(p => p.assists);
+            var awayPointLeader = awayTeam.MaxBy(p => p.Points);
+            var homePointLeader = homeTeam.MaxBy(p => p.Points);
+
+            categoryLeaders =
+            [
+                ("Goals", awayGoalLeader, homeGoalLeader)!,
+                ("Assists", awayAssistLeader, homeAssistLeader)!,
+                ("Points", awayPointLeader, homePointLeader)!
+            ];
+        }
+    }
+
+    private int GetPlayerCategoryValue(string category, Data.FNFPlayer player) => category switch
+    {
+        "Goals" => player.goals,
+        "Assists" => player.assists,
+        "Points" => player.Points,
+        _ => 0
+    };
+
+    private (int, int) GetPlayerCategoryGridProportions(string category, Data.FNFPlayer player1, Data.FNFPlayer player2)
+    {
+        double c1 = GetPlayerCategoryValue(category, player1);
+        double c2 = GetPlayerCategoryValue(category, player2);
+
+        // get ratio of player 1 category against player 2 category
+        int g1 = (int)(c1 / (c1+c2) * 12);
+        
+        return (g1, 12 - g1);
+    }
+
+    private string GetCountryColor(string abbrev) => abbrev switch
+    {
+        "CAN" => "#FF0000",
+        "USA" => "#1143BF",
+        "SWE" => "#FECC02",
+        "FIN" => "white",
+        _ => "purple"
+    };
+    
+}

@@ -5,6 +5,7 @@
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject Data.ScoreCalculationService ScoreCalculator
 @inject NavigationManager Navigation
+@inject IDialogService DialogService
 
 <PageTitle>Draft</PageTitle>
 
@@ -131,10 +132,6 @@
     </MudPaper>
 </div>
 
-<PlayerOverlay @bind-Visible="_playerOverlayVisible" PlayerInfo="overlayPlayer" />
-
-<GoalieOverlay @bind-Visible="_goalieOverlayVisible" PlayerInfo="overlayPlayer" />
-
 @code {
     private HubConnection? hubConnection;
     private bool isConnected => hubConnection is not null && hubConnection.State == HubConnectionState.Connected;
@@ -156,44 +153,6 @@
     private int numUserSelectedDefense => allPlayers.Where(p => p.position == "D" && p.user_id == CustomAuthenticationStateProvider.CurrentUser.id).Count();
     private int numUserSelectedGoalies => allPlayers.Where(p => p.position == "G" && p.user_id == CustomAuthenticationStateProvider.CurrentUser.id).Count();
     
-    private bool _playerOverlayVisible
-    {
-        get => playerOverlayVisible;
-        set
-        {
-            playerOverlayVisible = value;
-            if (!playerOverlayVisible)
-            {
-                overlayPlayer = null;
-            }
-            else
-            {
-                _goalieOverlayVisible = false;
-            }
-        }
-    }
-    private bool playerOverlayVisible = false;    
-    
-    private bool _goalieOverlayVisible
-    {
-        get => goalieOverlayVisible;
-        set
-        {
-            goalieOverlayVisible = value;
-            if (!goalieOverlayVisible)
-            {
-                overlayPlayer = null;
-            }
-            else
-            {
-                _playerOverlayVisible = false;
-            }
-        }
-    }
-    private bool goalieOverlayVisible = false;
-    
-    private Data.FNFPlayer? overlayPlayer;
-
     private string _selectedNationality
     {
         get => selectedNationality;
@@ -287,16 +246,27 @@
         playerToConfirm = null;
     }
 
-    private async Task RowClicked(Data.FNFPlayer player)
+    private Task RowClicked(Data.FNFPlayer player)
     {
-        overlayPlayer = player;
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        
         if (player.position == "G")
         {
-            goalieOverlayVisible = true;
+            var parameters = new DialogParameters<GoalieDialog>
+            {
+                { x => x.PlayerInfo, player }
+            };
+
+            return DialogService.ShowAsync<GoalieDialog>("Goalie", parameters, options);
         }
         else
         {
-            playerOverlayVisible = true;
+            var parameters = new DialogParameters<PlayerDialog>
+            {
+                { x => x.PlayerInfo, player }
+            };
+
+            return DialogService.ShowAsync<PlayerDialog>("Player", parameters, options);
         }
     }
 
