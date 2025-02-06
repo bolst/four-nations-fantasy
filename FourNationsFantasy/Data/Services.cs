@@ -49,7 +49,6 @@ public class ScoreCalculationService
 {
     private readonly DateOnly FirstDate = new DateOnly(2025, 02, 12);
     private readonly DateOnly LastDate = new DateOnly(2025, 02, 17);
-    private Dictionary<string, double> FantasyPointCache = new();
     
     public const double Goal = 3;
     public const double Assist = 1;
@@ -63,7 +62,7 @@ public class ScoreCalculationService
     public const double GoalieSave = 0.2;
     public const double GoalieShutout = 5;
 
-    public double CalculatePlayerGameScore(Nhl.Api.Models.Game.PlayerGameLog gameLog)
+    public double CalculatePlayerSeasonGameScore(Nhl.Api.Models.Game.PlayerGameLog gameLog)
     {
         return gameLog.Goals * Goal
                + gameLog.Assists * Assist
@@ -72,7 +71,7 @@ public class ScoreCalculationService
                + gameLog.Shots * ShotOnGoal;
     }    
     
-    public double CalculateGoalieGameScore(Nhl.Api.Models.Game.GoalieGameLog gameLog)
+    public double CalculateGoalieSeasonGameScore(Nhl.Api.Models.Game.GoalieGameLog gameLog)
     {
         return (gameLog.Decision is not null && gameLog.Decision.Equals("W") ? 1 : 0) * GoalieWin
             + gameLog.GoalsAgainst * GoalieGoalAgainst
@@ -82,23 +81,7 @@ public class ScoreCalculationService
 
     public double CalculatePlayerSeasonScore(FNFPlayer player)
     {
-        if (FantasyPointCache.TryGetValue(player.nhl_id, out double score))
-        {
-            return score;
-        }
-        
-        if (player.position == "G")
-        {
-            score = CalculateGoalieSeasonScore(player);
-        }
-        else
-        {
-            score = CalculateSkaterSeasonScore(player);
-        }
-        
-        FantasyPointCache.Add(player.nhl_id, score);
-
-        return score;
+        return player.position.Equals("G") ? CalculateGoalieSeasonScore(player) : CalculateSkaterSeasonScore(player);
     }
 
     private double CalculateSkaterSeasonScore(FNFPlayer player)
@@ -118,6 +101,21 @@ public class ScoreCalculationService
                + player.goalie_goals_against * GoalieGoalAgainst
                + player.goalie_saves * GoalieSave
                + player.goalie_shutouts * GoalieShutout;
+    }
+    
+    public double CalculatePlayerTournamentScore(FNFPlayer player)
+    {
+        return player.position.Equals("G") ? CalculateGoalieTournamentScore(player) : CalculateSkaterTournamentScore(player);
+    }
+
+    private double CalculateSkaterTournamentScore(FNFPlayer player)
+    {
+        return 0;
+    }
+    
+    private double CalculateGoalieTournamentScore(FNFPlayer player)
+    {
+        return 0;
     }
 
     public IEnumerable<(string, double)> Categories()

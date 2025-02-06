@@ -19,7 +19,7 @@
                 <MudText Typo="Typo.caption">@game.GameDate v @game.OpponentAbbrev</MudText>
             </tr>
             <tr>
-                <td>@ScoreCalculator.CalculateGoalieGameScore(game).ToString("F2")</td>
+                <td>@ScoreCalculator.CalculateGoalieSeasonGameScore(game).ToString("F2")</td>
                 <td>@(game.Decision is not null && game.Decision.Equals("W") ? 1 : 0)</td>
                 <td>@game.GoalsAgainst</td>
                 <td>@(game.ShotsAgainst - game.GoalsAgainst)</td>
