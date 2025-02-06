@@ -1,20 +1,24 @@
 ﻿@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
 @inject NavigationManager Navigation
 
-<MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
-        Home
-    </MudNavLink>
-    <MudNavLink Href="roster" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SportsHockey">
-        My Team
-    </MudNavLink>    
-    <MudNavLink Href="players" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Groups">
-        Players
-    </MudNavLink>
-    <MudNavLink Href="draft" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">
-        Draft
-    </MudNavLink>
-    <MudNavLink Href="schedule" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarToday">
-        Schedule
-    </MudNavLink>
-</MudNavMenu>
+<AuthorizeView>
+    <Authorized>
+        <MudNavMenu>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">
+                Home
+            </MudNavLink>
+            <MudNavLink Href="roster" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SportsHockey">
+                My Team
+            </MudNavLink>    
+            <MudNavLink Href="players" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Groups">
+                Players
+            </MudNavLink>
+            <MudNavLink Href="draft" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Assignment">
+                Draft
+            </MudNavLink>
+            <MudNavLink Href="schedule" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.CalendarToday">
+                Schedule
+            </MudNavLink>
+        </MudNavMenu>
+    </Authorized>
+</AuthorizeView>

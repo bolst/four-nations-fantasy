@@ -10,10 +10,10 @@
                 <MudText Typo="Typo.subtitle2">@User.teamname</MudText>
             </MudStack>
             <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
-                @if (playerProfiles is not null && goalieProfiles is not null)
+                @if (userRoster is not null)
                 {
-                    <MudText Typo="Typo.body2">@(PlayerGamesPlayed + GoalieGamesPlayed)/45 games played</MudText>
-                    <MudText Typo="Typo.body2">@((PlayerPointTotal + GoaliePointTotal).ToString("F2")) points</MudText>
+                    <MudText Typo="Typo.body2">@UserGamesPlayed/45 games played</MudText>
+                    <MudText Typo="Typo.body2">@(UserFantasyPoints.ToString("F2")) points</MudText>
                 }
                 else
                 {
@@ -28,22 +28,21 @@
 
 @code {
     [Parameter] 
-    public Data.User User { get; set; }
+    public Data.User? User { get; set; }
 
-    private IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>? playerProfiles;
-    private IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>? goalieProfiles;
+    private IEnumerable<Data.FNFPlayer>? userRoster;
 
-    private int PlayerGamesPlayed => playerProfiles?.Sum(p => p.Item2.Count()) ?? 0;
-    private int GoalieGamesPlayed => goalieProfiles?.Sum(p => p.Item2.Count()) ?? 0;
-    private double PlayerPointTotal => playerProfiles?.Sum(p => p.Item2.Sum(g => ScoreCalculator.CalculatePlayerSeasonGameScore(g))) ?? 0;
-    private double GoaliePointTotal => goalieProfiles?.Sum(p => p.Item2.Sum(g => ScoreCalculator.CalculateGoalieSeasonGameScore(g))) ?? 0;
+    // TODO:
+    private int UserGamesPlayed => 0;
+    //
+    
+    private double UserFantasyPoints => userRoster?.Sum(p => ScoreCalculator.CalculatePlayerTournamentScore(p)) ?? 0;
     
     protected override async Task OnInitializedAsync()
     {
         if (User?.id is not null)
         {
-            playerProfiles = await FNFData.GetRosterPlayerTournamentGameLogsAsync(User.id);
-            goalieProfiles = await FNFData.GetRosterGoalieTournamentGameLogsAsync(User.id);
+            userRoster = await FNFData.GetRosterAsync(User.id);
         }
     }
 }
