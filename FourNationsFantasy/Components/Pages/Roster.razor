@@ -53,7 +53,7 @@
     private Data.User? user;
     private IEnumerable<Data.FNFPlayer>? userRoster;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         if (string.IsNullOrEmpty(CustomAuthenticationStateProvider.CurrentUser.email))
         {
