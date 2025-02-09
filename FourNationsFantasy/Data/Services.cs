@@ -110,12 +110,21 @@ public class ScoreCalculationService
 
     private double CalculateSkaterTournamentScore(FNFPlayer player)
     {
-        return 0;
+        return player.fn_goals * Goal
+               + player.fn_assists * Assist
+               + player.fn_pp_points * PowerplayPoint
+               + player.fn_sh_points * ShorthandedPoint
+               + player.fn_shots_on_goal * ShotOnGoal
+               + player.fn_hits * Hit
+               + player.fn_blocks * Block; 
     }
     
     private double CalculateGoalieTournamentScore(FNFPlayer player)
     {
-        return 0;
+        return player.fn_goalie_wins * GoalieWin
+               + player.fn_goalie_goals_against * GoalieGoalAgainst
+               + player.fn_goalie_saves * GoalieSave
+               + player.fn_goalie_shutouts * GoalieShutout;
     }
 
     public IEnumerable<(string, double)> Categories()

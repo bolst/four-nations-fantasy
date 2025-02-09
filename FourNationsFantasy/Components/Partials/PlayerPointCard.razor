@@ -3,19 +3,20 @@
 
 @if (Player is not null)
 {
-    <MudPaper Class="pa-4 my-1" Elevation="3" @onclick="@ShowOverlay">
-        <MudStack>
-            <MudStack Row="true" AlignItems="AlignItems.Center">
-                <MudAvatar Color="Color.Surface" Size="Size.Medium" Class="mr-3">
-                    <MudImage Src="@Player.headshot" />
-                </MudAvatar>
-                <div>
+    <MudPaper Class="py-4 px-2 my-1" Elevation="3" @onclick="@ShowOverlay">
+        <MudStack Row="true" AlignItems="AlignItems.Center" StretchItems="StretchItems.End">
+            <MudAvatar Color="Color.Surface" Size="Size.Medium" Class="mr-3">
+                <MudImage Src="@Player.headshot" />
+            </MudAvatar>
+            <MudStack Spacing="0">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudText Typo="Typo.h6">@Player.firstname @Player.lastname</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        @Player.position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.nationality
-                        <span>&nbsp;&nbsp;•&nbsp;&nbsp; @Player.goals G &nbsp; @Player.assists A &nbsp; @Player.Points Pts</span>
-                    </MudText>
-                </div>
+                    <MudText Typo="Typo.body1">@Player.TournamentScore.ToString("F2")</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    @Player.position &nbsp;&nbsp;•&nbsp;&nbsp; @Player.nationality
+                    <span>&nbsp;&nbsp;•&nbsp;&nbsp; @Player.goals G &nbsp; @Player.assists A &nbsp; @Player.Points Pts</span>
+                </MudText>
             </MudStack>
         </MudStack>
     </MudPaper>

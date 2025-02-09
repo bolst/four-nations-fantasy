@@ -33,6 +33,26 @@ public class FNFPlayer : IEquatable<FNFPlayer>
     public int goalie_saves { get; set; }
 
     public int Points => goals + assists;
+    #endregion    
+    
+    #region Tournament totals
+
+    public int fn_games_played { get; set; } = 0;
+    public int fn_goals { get; set; }
+    public int fn_assists { get; set; }
+    public int fn_pp_points { get; set; }
+    public int fn_sh_points { get; set; }
+    public int fn_shots_on_goal { get; set; }
+    public int fn_hits { get; set; }
+    public int fn_blocks { get; set; }
+    public int fn_goalie_wins { get; set; }
+    public double fn_goalie_gaa { get; set; }
+    public double fn_goalie_sv_pctg { get; set; }
+    public int fn_goalie_shutouts { get; set; }
+    public int fn_goalie_goals_against { get; set; }
+    public int fn_goalie_saves { get; set; }
+
+    public int FNPoints => goals + assists;
     #endregion
 
     public int NhlIdInt => int.Parse(nhl_id);
@@ -72,6 +92,9 @@ public class FNFPlayer : IEquatable<FNFPlayer>
         if (other is null) return false;
         return (this.nhl_id == other.nhl_id);
     }
+
+    public double SeasonScore => new ScoreCalculationService().CalculatePlayerSeasonScore(this);
+    public double TournamentScore => new ScoreCalculationService().CalculatePlayerTournamentScore(this);
 }
 
 public class User
