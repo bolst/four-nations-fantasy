@@ -4,28 +4,19 @@ import requests
 import time
 from datetime import datetime
 
-# import schedule
-
 # create supabase client
 url: str = os.environ.get('SupabaseUrl__FNF')
 key: str = os.environ.get('SupabaseKeySR__FNF')
 supabase: Client = create_client(url, key)
 
-# pull players from db
-response = supabase.table('players').select('nhl_id').execute()
-players = response.data
-
-# get player ids
-player_ids = [player['nhl_id'] for player in players]
-print(f'{len(player_ids)} queried from Supabase')
-
-
 # this gets blocks and hits
-def fetch_realtime_stats_from_nhl(ids: list):
+def fetch_realtime_stats_from_nhl(ids: list, tournament=False):
     # example url
     # https://api.nhle.com/stats/rest/en/skater/realtime?limit=-1&cayenneExp=seasonId=20242025 and gameTypeId=2 and (playerId=8480036 or playerId=8480039)
 
-    base_url = 'https://api.nhle.com/stats/rest/en/skater/realtime?limit=-1&cayenneExp=seasonId=20242025 and gameTypeId=2 '
+    game_type = 19 if tournament else 2
+
+    base_url = f'https://api.nhle.com/stats/rest/en/skater/realtime?limit=-1&cayenneExp=seasonId=20242025 and gameTypeId={game_type} '
     nhl_api_url = base_url + 'and ('
 
     # loop all player ids except for last one
@@ -43,7 +34,7 @@ def fetch_realtime_stats_from_nhl(ids: list):
 
 
 # blocks and hits
-def update_table_player_realtime_stats(stats):
+def update_table_player_realtime_stats(stats, tournament=False):
     for stat in stats:
         entry = {
             'hits': stat['hits'],
@@ -51,14 +42,18 @@ def update_table_player_realtime_stats(stats):
             'stats_last_updated': str(datetime.now())
         }
 
-        response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
+        data = format_for_db(entry, tournament)
+
+        response = supabase.table('players').update(data).eq('nhl_id', stat['playerId']).execute()
 
 
-def fetch_player_stats_from_nhl(ids: list):
+def fetch_player_stats_from_nhl(ids: list, tournament=False):
     # example url
     # https://api.nhle.com/stats/rest/en/skater/summary?cayenneExp=seasonId=20242025 and playerId=8480039
 
-    base_url = 'https://api.nhle.com/stats/rest/en/skater/summary?limit=-1&cayenneExp=seasonId=20242025 '
+    game_type = 19 if tournament else 2
+
+    base_url = f'https://api.nhle.com/stats/rest/en/skater/summary?limit=-1&cayenneExp=seasonId=20242025 and gameTypeId={game_type} '
     nhl_api_url = base_url + 'and ('
 
     # loop all player ids except for last one
@@ -75,7 +70,7 @@ def fetch_player_stats_from_nhl(ids: list):
     return response.json()['data'] if response.status_code == 200 else []
 
 
-def update_table_player_stats(stats):
+def update_table_player_stats(stats, tournament=False):
     for stat in stats:
         entry = {
             'goals': stat['goals'],
@@ -87,14 +82,18 @@ def update_table_player_stats(stats):
             'stats_last_updated': str(datetime.now())
         }
 
-        response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
+        data = format_for_db(entry, tournament)
+
+        response = supabase.table('players').update(data).eq('nhl_id', stat['playerId']).execute()
 
 
-def fetch_goalie_stats_from_nhl(ids: list):
+def fetch_goalie_stats_from_nhl(ids: list, tournament=False):
     # example url
     # https://api.nhle.com/stats/rest/en/goalie/summary?cayenneExp=seasonId=20242025 and playerId=8480045
 
-    base_url = 'https://api.nhle.com/stats/rest/en/goalie/summary?cayenneExp=seasonId=20242025 '
+    game_type = 19 if tournament else 2
+
+    base_url = f'https://api.nhle.com/stats/rest/en/goalie/summary?cayenneExp=seasonId=20242025 and gameTypeId={game_type} '
     nhl_api_url = base_url + 'and ('
 
     # loop all player ids except for last one
@@ -111,7 +110,7 @@ def fetch_goalie_stats_from_nhl(ids: list):
     return response.json()['data'] if response.status_code == 200 else []
 
 
-def update_table_goalie_stats(stats):
+def update_table_goalie_stats(stats, tournament=False):
     for stat in stats:
         entry = {
             'goalie_wins': stat['wins'],
@@ -124,12 +123,35 @@ def update_table_goalie_stats(stats):
             'stats_last_updated': str(datetime.now())
         }
 
-        response = supabase.table('players').update(entry).eq('nhl_id', stat['playerId']).execute()
+        data = format_for_db(entry, tournament)
+
+        response = supabase.table('players').update(data).eq('nhl_id', stat['playerId']).execute()
+
+def format_for_db(entry: dict, tournament=False):
+    data = dict(entry)
+    if tournament:
+        for key in entry.keys():
+            if key not in ['stats_last_updated', 'games_played']:
+                data[f'fn_{key}'] = entry[key]
+    return data
 
 
 if __name__ == '__main__':
 
+    # pull players from db
+    response = supabase.table('players').select('nhl_id').execute()
+    players = response.data
+
+    # get player ids
+    player_ids = [player['nhl_id'] for player in players]
+    print(f'{len(player_ids)} queried from Supabase')
+
+    # pull games from db
+    response = supabase.table('games').select('nhl_id').execute()
+    games = [game['nhl_id'] for game in response.data]
+
     while True:
+        # regular season
         realtime_stats = fetch_realtime_stats_from_nhl(player_ids)
         print(f'{len(realtime_stats)} realtime stats queried from NHL')
         update_table_player_realtime_stats(realtime_stats)
@@ -143,6 +165,23 @@ if __name__ == '__main__':
         goalie_stats = fetch_goalie_stats_from_nhl(player_ids)
         print(f'{len(goalie_stats)} goalies queried from NHL')
         update_table_goalie_stats(goalie_stats)
+        print('------------------\n')
+
+
+        # tournament
+        fn_realtime_stats = fetch_realtime_stats_from_nhl(player_ids, tournament=True)
+        print(f'{len(fn_realtime_stats)} realtime stats queried from Four Nations')
+        update_table_player_realtime_stats(fn_realtime_stats, tournament=True)
+        print('------------------\n')
+
+        fn_player_stats = fetch_player_stats_from_nhl(player_ids, tournament=True)
+        print(f'{len(fn_player_stats)} players queried from Four Nations')
+        update_table_player_stats(fn_player_stats, tournament=True)
+        print('------------------\n')
+
+        fn_goalie_stats = fetch_goalie_stats_from_nhl(player_ids, tournament=True)
+        print(f'{len(fn_goalie_stats)} goalies queried from Four Nations')
+        update_table_goalie_stats(fn_goalie_stats, tournament=True)
         print('------------------\n')
 
         # sleep for 10 min
