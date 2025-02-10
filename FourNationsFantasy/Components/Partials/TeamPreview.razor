@@ -4,21 +4,23 @@
 @if (User is not null)
 {
     <a href=@($"roster/{User.id}")>
-        <MudPaper Class="pa-3 mud-theme-surface" Elevation="3">
-            <MudStack Style="min-height: 100px" Row="true" AlignItems="AlignItems.Center">
+        <MudPaper Class="px-2 pb-2 mud-theme-surface" Elevation="3">
+            <MudStack Style="min-height: 100px" Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center">
                 <MudAvatar Color="Color.Primary">@User.teamname.First()</MudAvatar>
                 <MudText Typo="Typo.subtitle2">@User.teamname</MudText>
             </MudStack>
-            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly">
+            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly" Spacing="1">
                 @if (userRoster is not null)
                 {
                     <MudText Typo="Typo.body2">@UserGamesPlayed/45 games played</MudText>
                     <MudText Typo="Typo.body2">@(UserFantasyPoints.ToString("F2")) points</MudText>
+                    <MudText Typo="Typo.caption" Color=@(rank == 1 ? Color.Warning : Color.Secondary)>@rankStr</MudText>
                 }
                 else
                 {
-                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Width="100px" />
-                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Width="100px" />
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Width="100px"/>
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Width="100px"/>
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="20px" Width="100px"/>
                 }
             </MudStack>
         </MudPaper>
@@ -32,6 +34,18 @@
 
     private IEnumerable<Data.FNFPlayer>? userRoster;
 
+
+    private int rank = -1;
+    private string rankStr => rank switch
+    {
+        -1 => string.Empty,
+        0 => "-",
+        1 => "1st",
+        2 => "2nd",
+        3 => "3rd",
+        _ => $"{rank}th"
+    };
+
     private int UserGamesPlayed => userRoster?.Sum(p => p.fn_games_played) ?? 0;
     
     private double UserFantasyPoints => userRoster?.Sum(p => ScoreCalculator.CalculatePlayerTournamentScore(p)) ?? 0;
@@ -41,6 +55,9 @@
         if (User?.id is not null)
         {
             userRoster = await FNFData.GetRosterAsync(User.id);
+
+            var rankings = ScoreCalculator.GetFantasyTeamRanking(await FNFData.GetAllPlayersAsync());
+            rank = rankings.First(x => x.Item2 == User.id).Item1;
         }
     }
 }

@@ -51,8 +51,6 @@ public interface IFNFData
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
-    Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId);
-    Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId);
     Task<Data.User?> GetUserThatHasPlayerAsync(Data.FNFPlayer player);
     Task<string> DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
@@ -126,52 +124,6 @@ public class FNFData : QueryDapperBase, IFNFData
                         P.user_id = @UserId";
         
         return await QueryDbAsync<FNFPlayer>(sql, new { UserId = userId });
-    }
-
-    public async Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId)
-    {
-        var roster = (await GetRosterAsync(userId)).ToList();
-
-        List<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)> gameLogs = new();
-
-        foreach (var player in roster.Where(x => x.position != "G"))
-        {
-            var gameLog = (await _nhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
-                Nhl.Api.Enumerations.Game.GameType.RegularSeason)).PlayerGameLogs;
-
-            gameLog = gameLog.Where(g =>
-            {
-                var gameDate = DateOnly.Parse(g.GameDate);
-                return gameDate >= FirstDate && gameDate <= LastDate;
-            }).ToList();
-            
-            gameLogs.Add((player, gameLog));
-        }
-
-        return gameLogs;
-    }
-    
-    public async Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId)
-    {
-        var roster = (await GetRosterAsync(userId)).ToList();
-
-        List<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)> gameLogs = new();
-
-        foreach (var player in roster.Where(x => x.position == "G"))
-        {
-            var gameLog = (await _nhlApi.GetGoalieSeasonGameLogsBySeasonAndGameTypeAsync(player.NhlIdInt, "20242025",
-                Nhl.Api.Enumerations.Game.GameType.RegularSeason)).GoalieGameLogs;
-            
-            gameLog = gameLog.Where(g =>
-            {
-                var gameDate = DateOnly.Parse(g.GameDate);
-                return gameDate >= FirstDate && gameDate <= LastDate;
-            }).ToList();
-            
-            gameLogs.Add((player, gameLog));
-        }
-
-        return gameLogs;
     }
 
     public async Task<Data.User?> GetUserThatHasPlayerAsync(Data.FNFPlayer player)

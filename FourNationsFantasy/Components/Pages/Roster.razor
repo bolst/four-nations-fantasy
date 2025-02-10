@@ -3,15 +3,17 @@
 
 @inject Data.IFNFData FNFData
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject Data.ScoreCalculationService ScoreCalculator
 @inject NavigationManager Navigation
 
 <PageTitle>Roster</PageTitle>
 
 @if (user is not null)
 {
-    <div class="pa-2 mb-8">
+    <MudStack Class="mb-4">
         <MudText Typo="Typo.h4" HtmlTag="i"><b>@user.teamname</b></MudText>
-    </div>
+        <MudText Typo="Typo.h6" Color=@(rank == 1 ? Color.Warning : Color.Secondary)>@rankStr</MudText>
+    </MudStack>
 }
 
 @if (userRoster is not null)
@@ -52,6 +54,16 @@
 
     private Data.User? user;
     private IEnumerable<Data.FNFPlayer>? userRoster;
+    private int rank = -1;
+    private string rankStr => rank switch
+    {
+        -1 => string.Empty,
+        0 => string.Empty,
+        1 => "1st place",
+        2 => "2nd place",
+        3 => "3rd place",
+        _ => $"{rank}th place"
+    };
 
     protected override async Task OnParametersSetAsync()
     {
@@ -74,5 +86,9 @@
         {
             userRoster = await FNFData.GetRosterAsync(user.id);
         }
+        
+        var rankings = ScoreCalculator.GetFantasyTeamRanking(await FNFData.GetAllPlayersAsync());
+        rank = rankings.First(x => x.Item2 == user.id).Item1;
+        
     }
 }
