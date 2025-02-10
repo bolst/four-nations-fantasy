@@ -53,6 +53,7 @@ public interface IFNFData
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
     Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId);
     Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId);
+    Task<Data.User?> GetUserThatHasPlayerAsync(Data.FNFPlayer player);
     Task<string> DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
     Task UpdateTeamNameAsync(Data.User user, string newName);
@@ -169,6 +170,17 @@ public class FNFData : QueryDapperBase, IFNFData
         }
 
         return gameLogs;
+    }
+
+    public async Task<Data.User?> GetUserThatHasPlayerAsync(Data.FNFPlayer player)
+    {
+        string sql = @"SELECT
+                          a.*
+                        FROM
+                          accounts a
+                          INNER JOIN players p ON p.user_id = a.id
+                          AND nhl_id = @NhlId";
+        return await QueryDbSingleAsync<Data.User>(sql, new { NhlId = player.nhl_id });
     }
 
 
