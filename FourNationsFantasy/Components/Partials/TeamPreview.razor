@@ -32,9 +32,7 @@
 
     private IEnumerable<Data.FNFPlayer>? userRoster;
 
-    // TODO:
     private int UserGamesPlayed => userRoster?.Sum(p => p.fn_games_played) ?? 0;
-    //
     
     private double UserFantasyPoints => userRoster?.Sum(p => ScoreCalculator.CalculatePlayerTournamentScore(p)) ?? 0;
     
