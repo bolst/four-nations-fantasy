@@ -127,6 +127,33 @@ public class ScoreCalculationService
                + player.fn_goalie_shutouts * GoalieShutout;
     }
 
+    public IEnumerable<(int, int)> GetFantasyTeamRanking(IEnumerable<FNFPlayer> allPlayers)
+    {
+        int rank = 1;
+        List<(int, int)> retval = new();
+
+        bool tournamentStarted = true;
+        if (allPlayers.All(p => p.TournamentScore == 0))
+        {
+            tournamentStarted = false;
+        }
+        
+        foreach (var roster in allPlayers.OrderByDescending(CalculatePlayerSeasonScore).Where(x => x.user_id is not null).GroupBy(x => x.user_id))
+        {
+            int userId = roster.Key!.Value;
+            if (tournamentStarted)
+            {
+                retval.Add((rank++, userId));
+            }
+            else
+            {
+                retval.Add((0, userId));
+            }
+        }
+
+        return retval;
+    }
+
     public IEnumerable<(string, double)> Categories()
     {
         yield return ("Goal", Goal);

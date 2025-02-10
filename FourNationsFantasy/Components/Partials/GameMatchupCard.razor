@@ -28,20 +28,13 @@
                     <MudText Color="Color.Surface">@Game.StartTimeUTC.AddHours(-5).ToString("h:mm tt")</MudText>
                     <MudText Color="Color.Surface">@Game.Venue.Default</MudText>
                     
-                    @if (userHasNotGuessed)
-                    {
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick=@( () => _guessOverlayVisible = true ) StartIcon="@Icons.Material.Filled.Scoreboard">Guess Score</MudButton>
-                    }
-                    else
-                    {
-                        <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick=@( () => _guessOverlayVisible = true ) StartIcon="@Icons.Material.Filled.Edit">Edit Guess</MudButton>
-                    }
+                    <GuessGameScoreButton Game="Game" />
+                    
                 </MudStack>
             </MudItem>
         </MudGrid>
     </MudPaper>
 
-    <GuessGameScoreOverlay @bind-Visible="_guessOverlayVisible" Game="Game" OnGuess="OnGuess" />
 }
 
 @code{
@@ -49,26 +42,6 @@
     [Parameter]
     public Nhl.Api.Models.Schedule.Game Game { get; set; }
 
-    private bool _guessOverlayVisible { get; set; }
-    private bool guessOverlayVisible = false;
-
-    private bool userHasNotGuessed = false;
-    
-    protected override async Task OnInitializedAsync()
-    {
-        if (Game is not null)
-        {
-            (int homeScore, int awayScore) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.id);
-            
-            // this is only scenario where user has guessed yet
-            userHasNotGuessed = homeScore == 0 && awayScore == 0;
-        }
-    }
-
-    private void OnGuess(bool status)
-    {
-        userHasNotGuessed = status;
-    }
 
     private Task OpenGameOverlay()
     {

@@ -1,0 +1,59 @@
+@inject Data.IFNFData FNFData
+@inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+
+@if (userHasNotGuessed)
+{
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick=@( () => _guessOverlayVisible = true ) StartIcon="@Icons.Material.Filled.Scoreboard" Disabled=@(!Game.GameState.Equals("FUT"))>Guess Score</MudButton>
+}
+else
+{
+    if (Game.GameState.Equals("FUT"))
+    {
+        <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick=@(() => _guessOverlayVisible = true) StartIcon="@Icons.Material.Filled.Edit">
+            Edit Guess
+        </MudButton>
+    }
+    else
+    {
+        <MudButton Variant="Variant.Filled" Disabled>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.caption">@homeScoreGuess @Game.HomeTeam.Abbrev</MudText>
+                <MudText Typo="Typo.caption">@awayScoreGuess @Game.AwayTeam.Abbrev</MudText>
+            </MudStack>
+        </MudButton>
+    }
+}
+
+<GuessGameScoreOverlay @bind-Visible="_guessOverlayVisible" Game="Game" OnGuess="OnGuess" />
+
+@code {
+    
+    [Parameter]
+    public Nhl.Api.Models.Schedule.Game Game { get; set; }
+    
+    private bool userHasNotGuessed = false;
+    
+    private bool _guessOverlayVisible { get; set; }
+    private bool guessOverlayVisible = false;
+
+    int homeScoreGuess = 0;
+    int awayScoreGuess = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Game is not null)
+        {
+            (homeScoreGuess, awayScoreGuess) = await FNFData.GetPlayerGameGuessAsync(Game.Id, CustomAuthenticationStateProvider.CurrentUser.id);
+            
+            // this is only scenario where user has guessed yet
+            userHasNotGuessed = homeScoreGuess == 0 && awayScoreGuess == 0;
+        }
+    }
+    
+        
+    private void OnGuess(bool status)
+    {
+        userHasNotGuessed = status;
+    }
+
+}

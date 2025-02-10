@@ -3,6 +3,7 @@
 @inject NavigationManager Navigation
 @inject Data.IFNFData FNFData
 @inject Data.CustomAuthenticationStateProvider CustomAuthenticationStateProvider
+@inject Data.ScoreCalculationService ScoreCalculator
 
 <PageTitle>4 Nations Fantasy</PageTitle>
 
@@ -20,7 +21,7 @@
         @foreach (var user in Users)
         {
             <MudItem xs="6" sm="4" md="3" lg="2">
-                <TeamPreview User="@user" />
+                <TeamPreview User="@user"/>
             </MudItem>
         }
     </MudGrid>
@@ -40,6 +41,13 @@
         }
         
         Users = await FNFData.GetAllUsersAsync();
+
+        var allPlayers = (await FNFData.GetAllPlayersAsync()).ToList();
+        Users = Users.OrderByDescending(u =>
+        {
+            var userPlayers = allPlayers.Where(p => p.user_id == u.id);
+            return userPlayers.Sum(p => ScoreCalculator.CalculatePlayerTournamentScore(p));
+        });
     }
 
 }
