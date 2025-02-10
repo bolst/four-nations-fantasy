@@ -20,7 +20,7 @@
                     }
                     else
                     {
-                        <MudText Class="white-text" Typo="Typo.caption">@teamNameStr</MudText>
+                        <MudText Class="white-text" Typo="Typo.caption"><b>@teamNameStr</b></MudText>
                     }
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
 
@@ -51,17 +51,17 @@
         </div>
     </TitleContent>
     <DialogContent>
-        <MudTabs Centered>
+        <MudTabs Style="width: 100%" Elevation="0" Centered>
             <MudTabPanel Text="4 Nations">
-                @if (playerGameLog is not null)
+                @if (playerTournamentGameLog is not null)
                 {
-                    @* <PlayerGameLog GameLogs="playerGameLog"/> *@
+                    <PlayerGameLog GameLogs="playerTournamentGameLog"/>
                 }
             </MudTabPanel>
             <MudTabPanel Text="Reg. Season">
-                @if (playerGameLog is not null)
+                @if (playerSeasonGameLog is not null)
                 {
-                    <PlayerGameLog GameLogs="playerGameLog"/>
+                    <PlayerGameLog GameLogs="playerSeasonGameLog"/>
                 }
             </MudTabPanel>
         </MudTabs>
@@ -77,7 +77,8 @@
     [Parameter]
     public Data.FNFPlayer? PlayerInfo { get; set; }
 
-    private Nhl.Api.Models.Game.PlayerSeasonGameLog? playerGameLog;
+    private Nhl.Api.Models.Game.PlayerSeasonGameLog? playerSeasonGameLog;
+    private Nhl.Api.Models.Game.PlayerSeasonGameLog? playerTournamentGameLog;
 
     private Data.User? playerUser;
     private string teamNameStr => (playerUser is null ? "Undrafted" : playerUser.teamname) ?? string.Empty;
@@ -93,8 +94,9 @@
             loading = true;
             DialogInstance.StateHasChanged();
             
-            playerGameLog = await NhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(PlayerInfo.NhlIdInt, "20242025", GameType.RegularSeason);
-
+            playerSeasonGameLog = await NhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(PlayerInfo.NhlIdInt, "20242025", GameType.RegularSeason);
+            playerTournamentGameLog = await FNFData.GetPlayerTournamentGameLogAsync(PlayerInfo);
+            
             playerUser = await FNFData.GetUserThatHasPlayerAsync(PlayerInfo);
 
             loading = false;
