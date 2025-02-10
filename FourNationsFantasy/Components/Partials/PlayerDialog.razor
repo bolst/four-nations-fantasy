@@ -1,5 +1,6 @@
 @using Nhl.Api.Enumerations.Game
 @inject Nhl.Api.INhlApi NhlApi
+@inject Data.IFNFData FNFData
 
 @if (PlayerInfo is not null)
 {
@@ -7,12 +8,20 @@
     <TitleContent>
         <div style="@backgroundCss(PlayerInfo)">
             <div style="width: 100%" class="d-flex justify-end">
-                <MudIconButton OnClick=@(() => MudDialog.Close()) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small"/>
+                <MudIconButton OnClick=@(() => DialogInstance.Close()) Class="ma-1" Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small"/>
             </div>
             <MudStack Class="px-4" Row="true" AlignItems="AlignItems.Center">
                 <MudImage Src="@PlayerInfo.headshot" Width="150"/>
-                <MudStack Style="width: 100%">
+                <MudStack Style="width: 100%" Spacing="1">
                     <MudText Class="white-text" Typo="Typo.h6">@PlayerInfo.firstname @PlayerInfo.lastname #@PlayerInfo.sweater_number</MudText>
+                    @if (loading)
+                    {
+                        <MudSkeleton SkeletonType="SkeletonType.Text" />
+                    }
+                    else
+                    {
+                        <MudText Class="white-text" Typo="Typo.caption">@teamNameStr</MudText>
+                    }
                     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround">
 
                         <MudStack AlignItems="AlignItems.Center">
@@ -63,20 +72,33 @@
 @code {
     
     [CascadingParameter]
-    private MudDialogInstance MudDialog { get; set; }
+    private MudDialogInstance DialogInstance { get; set; }
     
     [Parameter]
     public Data.FNFPlayer? PlayerInfo { get; set; }
 
     private Nhl.Api.Models.Game.PlayerSeasonGameLog? playerGameLog;
 
-    private string backgroundCss(Data.FNFPlayer player) => $"background: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url({player.hero_image}); background-size: 100% auto;";
+    private Data.User? playerUser;
+    private string teamNameStr => (playerUser is null ? "Undrafted" : playerUser.teamname) ?? string.Empty;
 
+    private bool loading = false;
+
+    private string backgroundCss(Data.FNFPlayer player) => $"background: linear-gradient( rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7) ), url({player.hero_image}); background-size: 100% auto;";
+    
     protected override async Task OnParametersSetAsync()
     {
         if (PlayerInfo is not null)
         {
+            loading = true;
+            DialogInstance.StateHasChanged();
+            
             playerGameLog = await NhlApi.GetPlayerSeasonGameLogsBySeasonAndGameTypeAsync(PlayerInfo.NhlIdInt, "20242025", GameType.RegularSeason);
+
+            playerUser = await FNFData.GetUserThatHasPlayerAsync(PlayerInfo);
+
+            loading = false;
+            DialogInstance.StateHasChanged();
         }
     }
 
