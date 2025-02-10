@@ -57,7 +57,7 @@
             userRoster = await FNFData.GetRosterAsync(User.id);
 
             var rankings = ScoreCalculator.GetFantasyTeamRanking(await FNFData.GetAllPlayersAsync());
-            rank = rankings.First(x => x.Item2 == User.id).Item1;
+            rank = rankings.FirstOrDefault(x => x.Item2 == User.id).Item1;
         }
     }
 }
