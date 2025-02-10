@@ -51,8 +51,6 @@ public interface IFNFData
     Task<IEnumerable<User>> GetAllUsersAsync();
     Task<IEnumerable<FNFPlayer>> GetAllPlayersAsync();
     Task<IEnumerable<FNFPlayer>> GetRosterAsync(int userId);
-    Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.PlayerGameLog>)>> GetRosterPlayerTournamentGameLogsAsync(int userId);
-    Task<IEnumerable<(Data.FNFPlayer, List<Nhl.Api.Models.Game.GoalieGameLog>)>> GetRosterGoalieTournamentGameLogsAsync(int userId);
     Task<string> DraftPlayerAsync(FNFPlayer player, User user);
     Task<(int, User?)> GetCurrentDraftPickTeamAsync();
     Task UpdateTeamNameAsync(Data.User user, string newName);
