@@ -88,7 +88,7 @@
         }
         
         var rankings = ScoreCalculator.GetFantasyTeamRanking(await FNFData.GetAllPlayersAsync());
-        rank = rankings.First(x => x.Item2 == user.id).Item1;
+        rank = rankings.FirstOrDefault(x => x.Item2 == user.id).Item1;
         
     }
 }
