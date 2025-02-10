@@ -27,7 +27,7 @@ public class CustomUserService
         
         if (!status)
         {
-            // TODO: log error message
+            errorMsg = "Unable to send OTP";
         }
         
         return (status, errorMsg);

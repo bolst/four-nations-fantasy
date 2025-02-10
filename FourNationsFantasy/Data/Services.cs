@@ -62,23 +62,6 @@ public class ScoreCalculationService
     public const double GoalieSave = 0.2;
     public const double GoalieShutout = 5;
 
-    public double CalculatePlayerSeasonGameScore(Nhl.Api.Models.Game.PlayerGameLog gameLog)
-    {
-        return gameLog.Goals * Goal
-               + gameLog.Assists * Assist
-               + gameLog.PowerPlayPoints * PowerplayPoint
-               + gameLog.ShorthandedPoints * ShorthandedPoint
-               + gameLog.Shots * ShotOnGoal;
-    }    
-    
-    public double CalculateGoalieSeasonGameScore(Nhl.Api.Models.Game.GoalieGameLog gameLog)
-    {
-        return (gameLog.Decision is not null && gameLog.Decision.Equals("W") ? 1 : 0) * GoalieWin
-            + gameLog.GoalsAgainst * GoalieGoalAgainst
-            + (gameLog.ShotsAgainst - gameLog.GoalsAgainst) * GoalieSave
-            + gameLog.Shutouts * GoalieShutout;
-    }
-
     public double CalculatePlayerSeasonScore(FNFPlayer player)
     {
         return player.position.Equals("G") ? CalculateGoalieSeasonScore(player) : CalculateSkaterSeasonScore(player);

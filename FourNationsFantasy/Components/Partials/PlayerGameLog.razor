@@ -2,10 +2,10 @@
 
 @if (GameLogs is not null)
 {
-<MudSimpleTable Style="height: 400px;" FixedHeader Dense>
+<MudSimpleTable Style="height: 400px;" Elevation="0" Striped FixedHeader Dense>
     <thead>
     <tr>
-        <th>Fan Pts</th>
+        <th></th>
         <th>G</th>
         <th>A</th>
         <th>PPP</th>
@@ -17,10 +17,10 @@
     @foreach (var game in GameLogs.PlayerGameLogs)
     {
     <tr>
-        <MudText Typo="Typo.caption">@game.GameDate v @game.OpponentAbbrev</MudText>
+        <MudText Typo="Typo.caption">@game.GameDate</MudText>
     </tr>
     <tr>
-        <td>@ScoreCalculator.CalculatePlayerSeasonGameScore(game).ToString("F2")</td>
+        <td>v @game.OpponentAbbrev</td>
         <td>@game.Goals</td>
         <td>@game.Assists</td>
         <td>@game.PowerPlayPoints</td>
