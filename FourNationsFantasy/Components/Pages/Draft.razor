@@ -9,6 +9,10 @@
 
 <PageTitle>Draft</PageTitle>
 
+<AuthorizeView Roles="admin">
+    <MudButton OnClick="RefreshPage">Refresh</MudButton>
+</AuthorizeView>
+
 @if (currentUserPick is not null && currentPick != 0 && currentPick <= 90)
 {
     <MudStack Class="mb-4" Row="true" Justify="Justify.Center">
@@ -342,9 +346,16 @@
             filteredPlayers = allPlayers;
             
             await InvokeAsync(StateHasChanged);
+            
+            RefreshPage();
         });
             
         await hubConnection.StartAsync();
+    }
+
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo("/draft", true);
     }
 }
 
