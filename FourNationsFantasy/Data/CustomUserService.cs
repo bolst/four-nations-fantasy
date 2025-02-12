@@ -37,6 +37,7 @@ public class CustomUserService
     {
         try
         {
+            await LogoutAsync();
             // var session = await _supabase.Auth.SignIn(Constants.SignInType.Email, ) (email, token, Constants.EmailOtpType.Email);
 
             var user = await LookupUserInDatabase(email);
