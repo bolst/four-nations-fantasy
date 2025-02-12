@@ -37,14 +37,18 @@ public class CustomUserService
     {
         try
         {
-            var session = await _supabase.Auth.VerifyOTP(email, token, Constants.EmailOtpType.Email);
+            // var session = await _supabase.Auth.SignIn(Constants.SignInType.Email, ) (email, token, Constants.EmailOtpType.Email);
 
-            if (session?.AccessToken is not null)
-            {
-                await PersistUserToBrowserAsync(email, session.AccessToken);
-            }
+            var user = await LookupUserInDatabase(email);
             
-            return (true, string.Empty);
+            if (user?.token == token)
+            {
+                await PersistUserToBrowserAsync(email, token);
+                return (true, string.Empty);
+            }
+
+            return (false, "Invalid OTP");
+            
         }
         catch
         {

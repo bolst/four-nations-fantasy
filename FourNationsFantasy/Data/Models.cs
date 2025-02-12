@@ -105,6 +105,7 @@ public class User
     public string? lastname { get; set; }
     public string? teamname { get; set; }
     public string role { get; set; }
+    public string token { get; set; }
     public bool IsAdmin => role.ToLower().Equals("admin");
 
     public ClaimsPrincipal ToClaimsPrincipal()
